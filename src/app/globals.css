@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Design tokens — Page_Structure.md PART C / UI_Guidelines.md §18.
+  Locked palette: Paper #fbf9f9, Ink #1c1b1b, Teal #008080 (signal color only).
+  Neutrals carry the design; teal reserved for primary CTAs, active states, focus (UI_Guidelines §18.6).
+*/
+:root {
+  --background: #fbf9f9; /* paper */
+  --surface: #f3f1f0;
+  --surface-elevated: #ffffff;
+  --foreground: #1c1b1b; /* ink */
+  --border: #e4e1e0;
+
+  --primary: #008080; /* teal */
+  --primary-foreground: #fbf9f9;
+
+  --radius-lg: 0.75rem;
+
+  /* Reserved for --shadow-* scale (UI_Guidelines §18.9 / §20.8) — values to be finalized
+     against real design exports; kept restrained per "no dramatic drop shadows". */
+  --shadow-sm: 0 1px 2px rgba(28, 27, 27, 0.06);
+  --shadow-md: 0 2px 8px rgba(28, 27, 27, 0.08);
+
+  /* Technical Mono placeholder (Page_Structure.md PART C) — no specific font file/vendor was
+     named in any supplied document, so no font is substituted, downloaded, or invented here
+     (Phase 9.3.4.1 Correction 1). This is a generic monospace fallback stack only; replace with
+     the real font's next/font `.variable` output once the asset is supplied — see src/lib/fonts.ts. */
+  --font-technical-mono: ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Dark theme surfaces — UI_Guidelines §18.5: paper/light logo version on dark surfaces. */
+.dark {
+  --background: #1c1b1b;
+  --surface: #242322;
+  --surface-elevated: #2c2b2a;
+  --foreground: #fbf9f9;
+  --border: #38363535;
+
+  --primary: #14a3a3;
+  --primary-foreground: #1c1b1b;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-hanken-grotesk), system-ui, sans-serif;
+}
+
+/*
+  RTL / LTR foundation — Page_Structure.md PART C, UI_Guidelines.md (logical properties everywhere,
+  mirror layout not brand/media). Actual mirroring is achieved via Tailwind logical utilities
+  (ms-*, me-*, ps-*, pe-*, text-start, text-end) at the component level — this stylesheet only
+  sets the direction-aware base.
+*/
+[dir="rtl"] body {
+  font-family: var(--font-technical-mono), var(--font-hanken-grotesk), system-ui, sans-serif;
+}
+
+/* Numerals stay LTR within bidi content (mono-labels, metadata, stats) per Component_List §13.7/§13.6/§15.3. */
+.numeral-ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Visible focus baseline — WCAG 2.2 AA (UI_Guidelines A11y, Page_Structure PART E5). */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
