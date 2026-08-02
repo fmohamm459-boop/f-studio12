@@ -2,6 +2,11 @@
   "name": "f-studio",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLICENSED",
+  "author": {
+    "name": "Fareed Mohammed",
+    "url": "https://github.com/fmohamm459-boop"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
