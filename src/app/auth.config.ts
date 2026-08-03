@@ -82,8 +82,8 @@ export default {
 
     session({ session, token }) {
       if (session.user && token.id) {
-        session.user.id = token.id;
-        session.user.username = token.username;
+        session.user.id = token.id as string;
+        session.user.username = token.username as string;
       }
       return session;
     },
