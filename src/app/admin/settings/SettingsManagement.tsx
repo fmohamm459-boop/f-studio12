@@ -1,5 +1,7 @@
 "use client";
-
+import { updateSiteSettings } from "@/lib/actions/settings";
+import type { SiteSettings } from "@prisma/client";
+import { updateOwnerPassword } from "@/lib/owner-store";
 import { useState, type FormEvent } from "react";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -56,7 +58,11 @@ function SavePanel({ label }: { label: string }) {
  * stage). The Danger Zone action requires an inline confirm step before
  * anything happens, and even then performs no request.
  */
-export function SettingsManagement() {
+export function SettingsManagement({
+  settings,
+}: {
+  settings: SiteSettings;
+}) {
   const [section, setSection] = useState<SectionKey>("overview");
   const [confirmingDanger, setConfirmingDanger] = useState(false);
   const [dangerDone, setDangerDone] = useState(false);
@@ -117,85 +123,173 @@ export function SettingsManagement() {
         {section === "general" ? (
           <section aria-label="General settings">
             <h2 className="font-sans text-lg font-semibold text-foreground">General</h2>
-            <div className="mt-6 flex flex-col gap-5">
-              <Input id="settings-studio-name" label="Studio name" defaultValue="F Studio" required />
+            <form
+              action={async (formData: FormData) => {
+                const siteName = formData.get("siteName") as string;
+                const language = formData.get("language") as string;
+                if (siteName) {
+                  await updateSiteSettings({ siteName, language });
+                }
+              }}
+              className="mt-6 flex flex-col gap-5"
+            >
+              <Input id="settings-studio-name" name="siteName" label="Studio name" defaultValue={settings.siteName} required/>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                <Select id="settings-language" label="Default language" options={LANGUAGE_OPTIONS} defaultValue="en" />
-                <Select id="settings-timezone" label="Time zone" options={[{ value: "utc", label: "UTC" }, { value: "gmt+1", label: "GMT+1" }]} defaultValue="utc" />
+                <Select id="settings-language" name="language" label="Default language" options={LANGUAGE_OPTIONS} defaultValue={settings.language} />
+                <Select id="settings-timezone" name="timezone" label="Time zone" options={[{ value: "utc", label: "UTC" }, { value: "gmt+1", label: "GMT+1" }]} defaultValue="utc" />
               </div>
-              <Select id="settings-theme" label="Theme" options={THEME_OPTIONS} defaultValue="system" />
-            </div>
-            <SavePanel label="general settings" />
+              <Select id="settings-theme" name="theme" label="Theme" options={THEME_OPTIONS} defaultValue="system" />
+              <div className="mt-2">
+                <Button type="submit">Save general settings</Button>
+              </div>
+            </form>
           </section>
         ) : null}
 
-        {section === "brand" ? (
-          <section aria-label="Brand settings">
-            <h2 className="font-sans text-lg font-semibold text-foreground">Brand</h2>
-            <div className="mt-6 flex flex-col gap-5">
-              <div>
-                <p className="text-sm font-medium text-foreground">Logo</p>
-                <div className="mt-2 flex items-center gap-4">
-                  <div aria-hidden="true" className="flex aspect-square w-20 items-center justify-center rounded-[var(--radius-lg)] border border-border bg-surface font-sans text-sm font-semibold text-foreground/40">
-                    F
-                  </div>
-                  <Button type="button" variant="secondary">
-                    Replace logo
-                  </Button>
-                </div>
-              </div>
-              <Input id="settings-accent" label="Accent color" defaultValue="#008080" hint="Teal is the only approved accent (UI_Guidelines §18.6)." />
-            </div>
-            <SavePanel label="brand settings" />
-          </section>
-        ) : null}
+       {section === "brand" ? (
+  <section aria-label="Brand settings">
+    <h2 className="font-sans text-lg font-semibold text-foreground">Brand</h2>
+
+    <form
+      action={async (formData: FormData) => {
+        await updateSiteSettings({
+          siteName: settings.siteName,
+          logoUrl: formData.get("logoUrl") as string,
+        });
+      }}
+      className="mt-6 flex flex-col gap-5"
+    >
+      <Input
+        id="settings-logo-url"
+        name="logoUrl"
+        label="Logo URL"
+        defaultValue={settings.logoUrl ?? ""}
+        hint="Enter the logo image URL."
+      />
+
+      <Button type="submit">
+        Save brand settings
+      </Button>
+    </form>
+  </section>
+) : null}
 
         {section === "contact" ? (
           <section aria-label="Contact and social settings">
             <h2 className="font-sans text-lg font-semibold text-foreground">Contact & Social</h2>
-            <div className="mt-6 flex flex-col gap-5">
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                <Input id="settings-email" type="email" label="Studio email" defaultValue="hello@fstudio.example" />
-                <Input id="settings-phone" type="tel" label="Studio phone" defaultValue="+1 555 010 1234" />
-              </div>
-              <Textarea id="settings-hours" label="Office hours" defaultValue={"Mon\u2013Fri, 9:00\u201318:00"} rows={2} />
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                <Input id="settings-linkedin" label="LinkedIn URL" defaultValue="https://linkedin.com/company/f-studio" />
-                <Input id="settings-instagram" label="Instagram URL" defaultValue="https://instagram.com/fstudio" />
-              </div>
-            </div>
+            <form
+  action={async (formData: FormData) => {
+    await updateSiteSettings({
+      siteName: settings.siteName,
+      email: formData.get("email") as string,
+      phone: formData.get("phone") as string,
+      linkedin: formData.get("linkedin") as string,
+      instagram: formData.get("instagram") as string,
+    });
+  }}
+  className="mt-6 flex flex-col gap-5"
+>
+  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+    <Input
+      id="settings-email"
+      name="email"
+      type="email"
+      label="Studio email"
+      defaultValue={settings.email ?? ""}
+    />
+
+    <Input
+      id="settings-phone"
+      name="phone"
+      type="tel"
+      label="Studio phone"
+      defaultValue={settings.phone ?? ""}
+    />
+  </div>
+
+  <Textarea
+    id="settings-hours"
+    name="hours"
+    label="Office hours"
+    defaultValue={"Mon–Fri, 9:00–18:00"}
+    rows={2}
+  />
+
+  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+    <Input
+      id="settings-linkedin"
+      name="linkedin"
+      label="LinkedIn URL"
+      defaultValue={settings.linkedin ?? ""}
+    />
+
+    <Input
+      id="settings-instagram"
+      name="instagram"
+      label="Instagram URL"
+      defaultValue={settings.instagram ?? ""}
+    />
+  </div>
+
+  <Button type="submit">Save contact settings</Button>
+</form>
             <SavePanel label="contact settings" />
           </section>
         ) : null}
 
-        {section === "security" ? (
-          <section aria-label="Security settings">
-            <h2 className="font-sans text-lg font-semibold text-foreground">Security</h2>
-            <div className="mt-6 flex flex-col gap-5">
-              <div className="flex items-center justify-between rounded-[var(--radius-lg)] border border-border p-4">
-                <div>
-                  <p className="text-sm font-medium text-foreground">Two-factor authentication</p>
-                  <p className="mt-0.5 text-xs text-foreground/60">Not enabled</p>
-                </div>
-                <Button type="button" variant="secondary">
-                  Enable
-                </Button>
-              </div>
-              <Input
-                id="settings-new-password"
-                type="password"
-                label="New password"
-                autoComplete="new-password"
-                hint="At least 12 characters, with a mix of letters and numbers."
-              />
-              <div className="rounded-[var(--radius-lg)] border border-border p-4">
-                <p className="text-sm font-medium text-foreground">Active sessions</p>
-                <p className="mt-1 text-sm text-foreground/70">1 active session on this device.</p>
-              </div>
-            </div>
-            <SavePanel label="security settings" />
-          </section>
-        ) : null}
+       {section === "security" ? (
+  <section aria-label="Security settings">
+    <h2 className="font-sans text-lg font-semibold text-foreground">Security</h2>
+
+    <form
+      action={async (formData: FormData) => {
+        const password = formData.get("password") as string;
+
+        if (password) {
+          await updateOwnerPassword(password);
+        }
+      }}
+      className="mt-6 flex flex-col gap-5"
+    >
+      <div className="flex items-center justify-between rounded-[var(--radius-lg)] border border-border p-4">
+        <div>
+          <p className="text-sm font-medium text-foreground">
+            Two-factor authentication
+          </p>
+          <p className="mt-0.5 text-xs text-foreground/60">
+            Not enabled
+          </p>
+        </div>
+
+        <Button type="button" variant="secondary">
+          Enable
+        </Button>
+      </div>
+
+      <Input
+        id="settings-new-password"
+        name="password"
+        type="password"
+        label="New password"
+        autoComplete="new-password"
+        hint="At least 12 characters, with a mix of letters and numbers."
+      />
+
+      <div className="rounded-[var(--radius-lg)] border border-border p-4">
+        <p className="text-sm font-medium text-foreground">
+          Active sessions
+        </p>
+        <p className="mt-1 text-sm text-foreground/70">
+          1 active session on this device.
+        </p>
+      </div>
+
+      <Button type="submit">
+        Save security settings
+      </Button>
+    </form>
+  </section>
+) : null}
 
         {section === "system" ? (
           <section aria-label="System and backup settings">

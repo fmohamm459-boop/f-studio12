@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import NextAuth from "next-auth";
-import authConfig from "./auth.config";
+import authConfig from "./app/auth.config";
 
 // Route protection (Phase 9.3.8, "Authentication Foundation"; made
 // functional + Edge-compatible in Phase 9.3.10-B, "Authentication

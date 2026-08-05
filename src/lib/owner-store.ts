@@ -55,5 +55,24 @@ export async function verifyOwnerCredentials(
     owner.passwordHash
   );
 
-  return matches ? owner : null;
+  return matches ? owner : null;}
+
+  export async function updateOwnerPassword(newPassword: string) {
+  const owner = await prisma.owner.findFirst();
+
+  if (!owner) {
+    throw new Error("Owner account not found.");
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 12);
+
+  return prisma.owner.update({
+    where: {
+      id: owner.id,
+    },
+    data: {
+      passwordHash,
+    },
+  });
+
 }
