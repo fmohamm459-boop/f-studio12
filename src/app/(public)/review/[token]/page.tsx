@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { TopNavBar } from "@/components/global/TopNavBar";
+import { TopNavBarWrapper } from "@/components/global/TopNavBarWrapper";
 import { Footer } from "@/components/global/Footer";
 import { Button } from "@/components/ui/Button";
 import { validateReviewToken } from "@/lib/actions/review";
@@ -38,7 +38,7 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
   if (!project) {
     return (
       <div className="flex min-h-dvh flex-col">
-        <TopNavBar />
+        <TopNavBarWrapper />
         <main role="main" className="flex-1">
           <section className="px-4 py-24 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
@@ -68,7 +68,7 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <TopNavBar />
+      <TopNavBarWrapper />
 
       <main role="main" className="flex-1">
         {/* Hero */}

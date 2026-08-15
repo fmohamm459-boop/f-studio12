@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { TopNavBar } from "@/components/global/TopNavBar";
+import { TopNavBarWrapper } from "@/components/global/TopNavBarWrapper";
 import { Footer } from "@/components/global/Footer";
 import { ServiceCard } from "@/components/content/ServiceCard";
 import { ProjectCard } from "@/components/content/ProjectCard";
@@ -54,15 +54,13 @@ export default async function HomePage() {
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <TopNavBar />
+      <TopNavBarWrapper />
 
       <main role="main" className="flex-1">
         {/* Hero */}
         <section className="border-b border-border bg-background px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
           <div className="mx-auto max-w-4xl text-center">
-            <p className="font-mono text-xs uppercase tracking-wide text-primary">
-              Innovation Labs 2024
-            </p>
+            
             <h1 className="mt-4 text-balance font-sans text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
               Digital Design &amp; Technology Solutions
             </h1>

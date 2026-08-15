@@ -22,18 +22,32 @@ const NAV_LINKS = [
  * supplied per public/assets/logo/README.md). Mobile disclosure uses Framer
  * Motion for a functional, quiet transition only (UI_Guidelines §19.2).
  */
-export function TopNavBar() {
+export function TopNavBar({
+  logoUrl,
+  siteName,
+}: {
+  logoUrl?: string | null;
+  siteName?: string | null;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
     <header role="banner" className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link
-          href="/"
-          className="font-sans text-lg font-semibold tracking-tight text-foreground ltr:text-left rtl:text-right"
-        >
-          F Studio
-        </Link>
+  href="/"
+  className="font-sans text-lg font-semibold tracking-tight text-foreground ltr:text-left rtl:text-right"
+>
+  {logoUrl ? (
+  <img
+    src={logoUrl}
+    alt={siteName || "F Studio"}
+    className="h-8 w-auto object-contain"
+  />
+) : (
+  siteName || "F Studio"
+)}
+</Link>
 
         <nav aria-label="Primary" className="hidden lg:block">
           <ul className="flex items-center gap-6">

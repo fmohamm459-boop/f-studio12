@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { TopNavBar } from "@/components/global/TopNavBar";
+import { TopNavBarWrapper } from "@/components/global/TopNavBarWrapper";
 import { Footer } from "@/components/global/Footer";
 import { ClientReviewForm } from "./ClientReviewForm";
 
@@ -32,7 +32,7 @@ const GUIDELINES = [
 export default function ClientReviewPage() {
   return (
     <div className="flex min-h-dvh flex-col">
-      <TopNavBar />
+      <TopNavBarWrapper />
 
       <main role="main" className="flex-1">
         <section className="border-b border-border px-4 py-16 sm:px-6 lg:px-8 lg:py-20">

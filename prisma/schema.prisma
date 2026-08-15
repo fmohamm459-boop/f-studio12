@@ -1,21 +1,3 @@
-// F Studio — Prisma Foundation (Phase 9.3.8, Database & Authentication Foundation)
-//
-// Scope: schema definition ONLY.
-//   - No migrations are generated at this stage (`prisma migrate` is not run).
-//   - No database is seeded.
-//   - No page, component, or API route reads from this schema yet — see the
-//     Phase 9.3.8 report, "Strict Rules" / "Validation".
-//
-// Approved models ONLY, per the project's Architecture Decision Record
-// (Decision 1): Project, Testimonial, Message. Do not add a User, Settings,
-// or any other entity here without an explicit, separately-approved decision
-// (see src/database/README.md, which pre-dates and constrains this file).
-//
-// Field shapes intentionally mirror src/lib/mock-data.ts — the existing
-// static data source every public/admin page currently renders from — so a
-// future, separately-scoped Data Integration phase can swap mock data for
-// real queries without reshaping any page or component.
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -26,9 +8,112 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// ---------------------------------------------------------------------------
-// Enums
-// ---------------------------------------------------------------------------
+/// Portfolio case study. Backs the public Portfolio (§4) and Project Details
+/// (§5) pages, and the admin Projects Management page (§13).
+/// Mirrors: src/lib/mock-data.ts `Project` / `PROJECTS`.
+model Project {
+  id             String          @id @default(cuid())
+  slug           String          @unique
+  title          String
+  client         String
+  category       ProjectCategory
+  year           String
+  role           String
+  status         ProjectStatus   @default(DRAFT)
+  liveLink       String?
+  summary        String
+  description    String
+  tags           String[]
+  overview       String
+  challenge      String
+  research       String
+  solution       String
+  /// Array of { label, value, trend?: { direction: "up" | "down", text } },
+  /// matching `Project["resultStats"]` in mock-data.ts. Kept as Json rather
+  /// than a separate relation/model — introducing a new related model is
+  /// outside this phase's "approved models ONLY" restriction.
+  resultStats    Json
+  projectLink    String?
+  pdfFiles       String[]        @default([])
+  reviewToken    String?         @unique
+  tokenExpiresAt DateTime?
+  heroImage      String?
+  galleryImages  String[]        @default([])
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@map("projects")
+}
+
+/// Client testimonial. Backs the public Testimonials page (§7) and the
+/// admin Testimonials Management page (§15).
+/// Mirrors: src/lib/mock-data.ts `Testimonial` / `TESTIMONIALS`.
+model Testimonial {
+  id          String            @id @default(cuid())
+  quote       String
+  author      String
+  role        String
+  rating      Float
+  projectSlug String?
+  status      TestimonialStatus @default(PENDING)
+  submittedAt DateTime          @default(now())
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@map("testimonials")
+}
+
+/// Contact inquiry. Backs submissions from the public Contact form (§8)
+/// and the admin Messages Management inbox (§14).
+/// Mirrors: src/lib/mock-data.ts `Message` / `MESSAGES`.
+model Message {
+  id         String         @id @default(cuid())
+  name       String
+  email      String
+  subject    String
+  service    MessageService
+  message    String
+  status     MessageStatus  @default(NEW)
+  receivedAt DateTime       @default(now())
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@map("messages")
+}
+
+model Owner {
+  id           String   @id @default(cuid())
+  name         String
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model SiteSettings {
+  id          String   @id @default(cuid())
+  siteName    String
+  logoUrl     String?
+  email       String?
+  phone       String?
+  address     String?
+  linkedin    String?
+  instagram   String?
+  twitter     String?
+  language    String   @default("en")
+  direction   String   @default("ltr")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  description String?
+  faviconUrl  String?
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  type      String
+  createdAt DateTime @default(now())
+}
 
 /// Mirrors ProjectCategory in src/lib/mock-data.ts. Values also back the
 /// five F Studio services (Component_List §13.5 / §14.1), minus "Logo
@@ -73,144 +158,4 @@ enum MessageStatus {
   NEW
   READ
   REPLIED
-}
-
-// ---------------------------------------------------------------------------
-// Models (3 approved entities only)
-// ---------------------------------------------------------------------------
-
-/// Portfolio case study. Backs the public Portfolio (§4) and Project Details
-/// (§5) pages, and the admin Projects Management page (§13).
-/// Mirrors: src/lib/mock-data.ts `Project` / `PROJECTS`.
-model Project {
-  id   String @id @default(cuid())
-  slug String @unique
-
-  title       String
-  client      String
-  category    ProjectCategory
-  year        String
-  role        String
-  status      ProjectStatus   @default(DRAFT)
-  liveLink    String?
-  summary     String
-  description String
-  tags        String[]
-
-  // Case study narrative (Component_List §13.4 "Brand Identity Case Study
-  // Structure" / §13.8 "Project Details Experience").
-  overview  String
-  challenge String
-  research  String
-  solution  String
-
-  /// Array of { label, value, trend?: { direction: "up" | "down", text } },
-  /// matching `Project["resultStats"]` in mock-data.ts. Kept as Json rather
-  /// than a separate relation/model — introducing a new related model is
-  /// outside this phase's "approved models ONLY" restriction.
-  resultStats Json
-
-  // --- Client Review System (Phase 9.3.11, private token-link model) ---
-  // Per Phase 9.3 Decision Record 002: no Client/User model, no client
-  // accounts — access is a single unguessable, expiring token per project
-  // instead. `projectLink` is intentionally distinct from `liveLink`
-  // above: `liveLink` is the public portfolio URL, `projectLink` is the
-  // staging/Figma link shown only on the private review page.
-  projectLink    String?
-  pdfFiles       String[]  @default([])
-  reviewToken    String?   @unique
-  tokenExpiresAt DateTime?
-
-  // --- File & Media Management (Phase 9.3.12 Stage 2) ---
-  // Cloudinary secure_url values only (Task 6) — no public_id, asset_id,
-  // version, or other Cloudinary metadata is stored. `heroImage` is a
-  // single, replaceable image; `galleryImages` preserves upload order
-  // (append-only from the admin UI, same array-of-URL shape `pdfFiles`
-  // already established above).
-  heroImage     String?
-  galleryImages String[] @default([])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("projects")
-}
-
-/// Client testimonial. Backs the public Testimonials page (§7) and the
-/// admin Testimonials Management page (§15).
-/// Mirrors: src/lib/mock-data.ts `Testimonial` / `TESTIMONIALS`.
-model Testimonial {
-  id String @id @default(cuid())
-
-  quote       String
-  author      String
-  role        String
-  rating      Float
-  projectSlug String?
-  status      TestimonialStatus @default(PENDING)
-  submittedAt DateTime          @default(now())
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("testimonials")
-}
-
-/// Contact inquiry. Backs submissions from the public Contact form (§8)
-/// and the admin Messages Management inbox (§14).
-/// Mirrors: src/lib/mock-data.ts `Message` / `MESSAGES`.
-model Message {
-  id String @id @default(cuid())
-
-  name       String
-  email      String
-  subject    String
-  service    MessageService
-  message    String
-  status     MessageStatus  @default(NEW)
-  receivedAt DateTime       @default(now())
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("messages")
-}
-
-model Owner {
-  id           String   @id @default(cuid())
-  name         String
-  username     String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
-}
-
-model SiteSettings {
-  id String @id @default(cuid())
-
-  siteName String
-  logoUrl  String?
-
-  email   String?
-  phone   String?
-  address String?
-
-  linkedin  String?
-  instagram String?
-  twitter   String?
-
-  language  String @default("en")
-  direction String @default("ltr")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Media {
-  id String @id @default(cuid())
-
-  filename String
-  url      String
-  type     String
-
-  createdAt DateTime @default(now())
 }

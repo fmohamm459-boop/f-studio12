@@ -64,12 +64,30 @@ function revalidateProjectPaths(slug?: string) {
   revalidatePath("/admin/projects");
   if (slug) revalidatePath(`/portfolio/${slug}`);
 }
+async function getUniqueProjectSlug(slug: string) {
+  const baseSlug = slug || "project";
+  let uniqueSlug = baseSlug;
+  let counter = 2;
+
+  while (
+    await prisma.project.findUnique({
+      where: { slug: uniqueSlug },
+    })
+  ) {
+    uniqueSlug = `${baseSlug}-${counter}`;
+    counter += 1;
+  }
+
+  return uniqueSlug;
+}
 
 export async function createProject(input: ProjectInput) {
   await requireAdmin();
+  const uniqueSlug = await getUniqueProjectSlug(input.slug);
+  
   await prisma.project.create({
     data: {
-      slug: input.slug,
+      slug: uniqueSlug,
       title: input.title,
       client: input.client,
       category: categoryToDb(input.category),
@@ -90,7 +108,7 @@ export async function createProject(input: ProjectInput) {
       galleryImages: input.galleryImages ?? [],
     },
   });
-  revalidateProjectPaths(input.slug);
+ revalidateProjectPaths(uniqueSlug);
 }
 
 export async function updateProject(slug: string, input: Partial<ProjectInput>) {

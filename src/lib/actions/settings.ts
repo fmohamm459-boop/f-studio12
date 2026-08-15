@@ -21,16 +21,22 @@ export async function getSiteSettings() {
 
 export async function updateSiteSettings(data: {
   siteName: string;
+  description?: string | null;
+
   logoUrl?: string | null;
+  faviconUrl?: string | null;
+
   email?: string | null;
   phone?: string | null;
   address?: string | null;
+
   linkedin?: string | null;
   instagram?: string | null;
   twitter?: string | null;
+
   language?: string;
   direction?: string;
-}) {
+}){
   const existing = await prisma.siteSettings.findFirst();
 
   if (!existing) {

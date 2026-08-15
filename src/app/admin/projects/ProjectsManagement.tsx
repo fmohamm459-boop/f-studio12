@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
-import type { Project, ProjectCategory } from "@/lib/mock-data";
-import { deleteProject, updateProject } from "@/lib/actions/projects";
+import type { Project, ProjectCategory, ProjectStatus } from "@/lib/mock-data";
+import { createProject, deleteProject, updateProject } from "@/lib/actions/projects";
 import { ReviewLinkPanel } from "./ReviewLinkPanel";
 import { UploadZone } from "./PdfUploadZone";
 
@@ -22,6 +22,11 @@ const CATEGORY_OPTIONS: { value: ProjectCategory; label: string }[] = [
   { value: "Web Development", label: "Web Development" },
   { value: "Data Analysis", label: "Data Analysis" },
   { value: "AI", label: "AI" },
+];
+
+const STATUS_OPTIONS: { value: ProjectStatus; label: string }[] = [
+  { value: "Draft", label: "Draft" },
+  { value: "Published", label: "Published" },
 ];
 
 const columns: DataTableColumn<Project>[] = [
@@ -98,13 +103,50 @@ export function ProjectsManagement({ projects }: ProjectsManagementProps) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [editing, setEditing] = useState<Project | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const [saved, setSaved] = useState(false);
   const [reviewLinkFor, setReviewLinkFor] = useState<Project | null>(null);
   const [pdfFilesDraft, setPdfFilesDraft] = useState<string[]>([]);
   const [heroImageDraft, setHeroImageDraft] = useState<string[]>([]);
   const [galleryImagesDraft, setGalleryImagesDraft] = useState<string[]>([]);
+  function openCreateProject() {
+  setIsCreating(true);
+  setSaved(false);
+  setPdfFilesDraft([]);
+  setHeroImageDraft([]);
+  setGalleryImagesDraft([]);
 
+  setEditing({
+    slug: "",
+    title: "",
+    client: "",
+    category: "Branding",
+    year: "",
+    role: "",
+    summary: "",
+    description: "",
+    tags: [],
+    overview: "",
+    challenge: "",
+    research: "",
+    solution: "",
+    resultStats: [],
+    pdfFiles: [],
+    heroImage: "",
+    galleryImages: [],
+  });
+}
+function generateSlug(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
   function openEditor(project: Project) {
+    setIsCreating(false);
     setSaved(false);
     setPdfFilesDraft(project.pdfFiles ?? []);
     setHeroImageDraft(project.heroImage ? [project.heroImage] : []);
@@ -122,24 +164,41 @@ export function ProjectsManagement({ projects }: ProjectsManagementProps) {
       .filter(Boolean);
 
     startTransition(async () => {
-      await updateProject(editing.slug, {
-        title: String(formData.get("title") ?? editing.title),
-        client: String(formData.get("client") ?? editing.client),
-        category: (formData.get("category") as ProjectCategory) ?? editing.category,
-        year: String(formData.get("year") ?? editing.year),
-        role: String(formData.get("role") ?? editing.role),
-        tags: tags.length > 0 ? tags : editing.tags,
-        overview: String(formData.get("overview") ?? editing.overview),
-        challenge: String(formData.get("challenge") ?? editing.challenge),
-        research: String(formData.get("research") ?? editing.research),
-        solution: String(formData.get("solution") ?? editing.solution),
-        pdfFiles: pdfFilesDraft,
-        heroImage: heroImageDraft[0] ?? null,
-        galleryImages: galleryImagesDraft,
-      });
-      setSaved(true);
-      router.refresh();
-    });
+  const title = String(formData.get("title") ?? editing.title);
+  const status = (formData.get("status") as ProjectStatus) ?? editing.status ?? "Draft";
+
+  const projectData = {
+    slug: isCreating ? generateSlug(title) : editing.slug,
+    title,
+    client: String(formData.get("client") ?? editing.client),
+    category: (formData.get("category") as ProjectCategory) ?? editing.category,
+    year: String(formData.get("year") ?? editing.year),
+    status,
+    role: String(formData.get("role") ?? editing.role),
+    tags: tags.length > 0 ? tags : editing.tags,
+    summary: String(formData.get("summary") ?? editing.summary),
+   description: String(formData.get("description") ?? editing.description),
+    overview: String(formData.get("overview") ?? editing.overview),
+    challenge: String(formData.get("challenge") ?? editing.challenge),
+    research: String(formData.get("research") ?? editing.research),
+    solution: String(formData.get("solution") ?? editing.solution),
+    resultStats: editing.resultStats ?? [],
+    pdfFiles: pdfFilesDraft,
+    heroImage: heroImageDraft[0] ?? null,
+    galleryImages: galleryImagesDraft,
+    liveLink: String(formData.get("liveLink") ?? editing.liveLink ?? "").trim(),
+  };
+
+  if (isCreating) {
+    await createProject(projectData);
+  } else {
+    await updateProject(editing.slug, projectData);
+  }
+
+  setSaved(true);
+  setIsCreating(false);
+  router.refresh();
+});
   }
 
   function handleDelete(project: Project) {
@@ -152,6 +211,11 @@ export function ProjectsManagement({ projects }: ProjectsManagementProps) {
 
   return (
     <>
+    <div className="mb-6 flex justify-end">
+  <Button type="button" onClick={openCreateProject}>
+    + Add Project
+  </Button>
+</div>
       <DataTable
         caption="All projects"
         columns={columns}
@@ -253,10 +317,40 @@ export function ProjectsManagement({ projects }: ProjectsManagementProps) {
                   defaultValue={editing.category}
                   required
                 />
+                <Select
+  id="editor-status"
+  name="status"
+  label="Status"
+  options={STATUS_OPTIONS}
+  defaultValue={editing.status ?? "Draft"}
+  required
+/>
                 <Input id="editor-year" name="year" label="Year" defaultValue={editing.year} required />
               </div>
 
               <Input id="editor-role" name="role" label="Role" defaultValue={editing.role} required />
+             <Textarea
+  id="editor-summary"
+  name="summary"
+  label="Summary"
+  defaultValue={editing.summary}
+  rows={3}
+/>
+<Textarea
+  id="editor-description"
+  name="description"
+  label="Description"
+  defaultValue={editing.description}
+  rows={4}
+/>
+<Input
+  id="editor-live-link"
+  name="liveLink"
+  label="Live Link"
+  defaultValue={editing.liveLink ?? ""}
+  type="url"
+  placeholder="https://example.com"
+/>
               <Input id="editor-tags" name="tags" label="Technology tags" defaultValue={editing.tags.join(", ")} hint="Comma-separated" />
 
               <Textarea id="editor-overview" name="overview" label="Overview" defaultValue={editing.overview} rows={3} />

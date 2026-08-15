@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { TopNavBar } from "@/components/global/TopNavBar";
+import { TopNavBarWrapper } from "@/components/global/TopNavBarWrapper";
 import { Footer } from "@/components/global/Footer";
 import { MonoChip } from "@/components/content/MonoChip";
 import { StatWidget } from "@/components/data/StatWidget";
@@ -115,7 +115,7 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <TopNavBar />
+      <TopNavBarWrapper />
 
       <main role="main" className="flex-1">
         {/* Project Hero */}

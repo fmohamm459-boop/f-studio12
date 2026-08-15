@@ -127,15 +127,29 @@ export function SettingsManagement({
               action={async (formData: FormData) => {
                 const siteName = formData.get("siteName") as string;
                 const language = formData.get("language") as string;
+                const direction = formData.get("direction") as string;
                 if (siteName) {
-                  await updateSiteSettings({ siteName, language });
-                }
+  await updateSiteSettings({
+    siteName,
+    description: formData.get("description") as string,
+    language,
+    direction,
+  });
+}
               }}
               className="mt-6 flex flex-col gap-5"
             >
               <Input id="settings-studio-name" name="siteName" label="Studio name" defaultValue={settings.siteName} required/>
+              <Textarea
+  id="settings-description"
+  name="description"
+  label="Site description"
+  defaultValue={settings.description ?? ""}
+  rows={3}
+/>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <Select id="settings-language" name="language" label="Default language" options={LANGUAGE_OPTIONS} defaultValue={settings.language} />
+                <Select id="settings-direction" name="direction" label="Text direction" options={[{ value: "ltr", label: "Left to Right (LTR)" },{ value: "rtl", label: "Right to Left (RTL)" },]}defaultValue={settings.direction}/>
                 <Select id="settings-timezone" name="timezone" label="Time zone" options={[{ value: "utc", label: "UTC" }, { value: "gmt+1", label: "GMT+1" }]} defaultValue="utc" />
               </div>
               <Select id="settings-theme" name="theme" label="Theme" options={THEME_OPTIONS} defaultValue="system" />
@@ -153,9 +167,10 @@ export function SettingsManagement({
     <form
       action={async (formData: FormData) => {
         await updateSiteSettings({
-          siteName: settings.siteName,
-          logoUrl: formData.get("logoUrl") as string,
-        });
+  siteName: settings.siteName,
+  logoUrl: formData.get("logoUrl") as string,
+  faviconUrl: formData.get("faviconUrl") as string,
+});
       }}
       className="mt-6 flex flex-col gap-5"
     >
@@ -166,6 +181,8 @@ export function SettingsManagement({
         defaultValue={settings.logoUrl ?? ""}
         hint="Enter the logo image URL."
       />
+
+      <Input id="settings-favicon-url" name="faviconUrl" label="Favicon URL" defaultValue={settings.faviconUrl ?? ""} hint="Enter the favicon image URL." />
 
       <Button type="submit">
         Save brand settings
@@ -180,12 +197,14 @@ export function SettingsManagement({
             <form
   action={async (formData: FormData) => {
     await updateSiteSettings({
-      siteName: settings.siteName,
-      email: formData.get("email") as string,
-      phone: formData.get("phone") as string,
-      linkedin: formData.get("linkedin") as string,
-      instagram: formData.get("instagram") as string,
-    });
+  siteName: settings.siteName,
+  email: formData.get("email") as string,
+  phone: formData.get("phone") as string,
+  address: formData.get("address") as string,
+  linkedin: formData.get("linkedin") as string,
+  instagram: formData.get("instagram") as string,
+  twitter: formData.get("twitter") as string,
+});
   }}
   className="mt-6 flex flex-col gap-5"
 >
@@ -205,6 +224,12 @@ export function SettingsManagement({
       label="Studio phone"
       defaultValue={settings.phone ?? ""}
     />
+    <Input
+  id="settings-address"
+  name="address"
+  label="Studio address"
+  defaultValue={settings.address ?? ""}
+/>
   </div>
 
   <Textarea
@@ -229,6 +254,12 @@ export function SettingsManagement({
       label="Instagram URL"
       defaultValue={settings.instagram ?? ""}
     />
+    <Input
+  id="settings-twitter"
+  name="twitter"
+  label="Twitter URL"
+  defaultValue={settings.twitter ?? ""}
+/>
   </div>
 
   <Button type="submit">Save contact settings</Button>
