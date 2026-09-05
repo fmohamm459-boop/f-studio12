@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
-import { SERVICE_OPTIONS } from "@/lib/mock-data";
 import { createMessage } from "@/lib/actions/messages";
+import { useTranslation } from "@/i18n/client";
 
 /**
  * Contact form — page-local client wrapper around the existing Input/Textarea/
@@ -28,9 +28,18 @@ import { createMessage } from "@/lib/actions/messages";
  * unreachable), which still throw.
  */
 export function ContactForm() {
+  const { dict } = useTranslation();
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const serviceOptions = [
+    { value: "branding", label: dict.contact.serviceBranding },
+    { value: "web-development", label: dict.contact.serviceWebDev },
+    { value: "data-analysis", label: dict.contact.serviceDataAnalysis },
+    { value: "ai", label: dict.contact.serviceAi },
+    { value: "other", label: dict.contact.serviceOther },
+  ];
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -50,7 +59,7 @@ export function ContactForm() {
           setError(result.error);
         }
       } catch {
-        setError("Something went wrong sending your message. Please try again.");
+        setError(dict.contact.errorMessage);
       }
     });
   }
@@ -58,9 +67,9 @@ export function ContactForm() {
   if (submitted) {
     return (
       <div role="status" className="rounded-[var(--radius-lg)] border border-border bg-surface-elevated p-8 text-center">
-        <p className="font-sans text-lg font-semibold text-foreground">Message sent</p>
+        <p className="font-sans text-lg font-semibold text-foreground">{dict.contact.messageSent}</p>
         <p className="mt-2 text-sm text-foreground/70">
-          Thanks for reaching out — we&apos;ll follow up within one business day.
+          {dict.contact.messageSentDesc}
         </p>
       </div>
     );
@@ -69,22 +78,22 @@ export function ContactForm() {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <Input id="contact-name" name="name" label="Name" autoComplete="name" required />
-        <Input id="contact-email" name="email" type="email" label="Email" autoComplete="email" required />
+        <Input id="contact-name" name="name" label={dict.contact.name} autoComplete="name" required />
+        <Input id="contact-email" name="email" type="email" label={dict.contact.email} autoComplete="email" required />
       </div>
       <Select
         id="contact-service"
         name="service"
-        label="Service"
-        placeholder="Select a service"
-        options={SERVICE_OPTIONS}
+        label={dict.contact.service}
+        placeholder={dict.contact.selectService}
+        options={serviceOptions}
         required
       />
       <Textarea
         id="contact-message"
         name="message"
-        label="Message"
-        placeholder="Tell us about your project"
+        label={dict.contact.message}
+        placeholder={dict.contact.messagePlaceholder}
         required
       />
       {error ? (
@@ -93,7 +102,7 @@ export function ContactForm() {
         </p>
       ) : null}
       <Button type="submit" className="self-start" aria-busy={isPending} disabled={isPending}>
-        {isPending ? "Sending…" : "Send message"}
+        {isPending ? dict.contact.sending : dict.contact.sendMessage}
       </Button>
     </form>
   );

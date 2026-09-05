@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { hankenGrotesk } from "@/lib/fonts";
 import { prisma } from "@/lib/prisma";
+import { getServerLocale } from "@/i18n/server";
+import { getDirectionForLocale } from "@/i18n/config";
+import { LanguageProvider } from "@/i18n/client";
 import "./globals.css";
 
 async function getSiteSettings() {
@@ -32,18 +35,20 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const settings = await getSiteSettings();
-
-  const language = settings?.language ?? "en";
-  const direction = settings?.direction ?? "ltr";
+  const locale = await getServerLocale();
+  const direction = getDirectionForLocale(locale);
 
   return (
     <html
-      lang={language}
+      lang={locale}
       dir={direction}
       className={hankenGrotesk.variable}
     >
-      <body>{children}</body>
+      <body>
+        <LanguageProvider initialLocale={locale}>
+          {children}
+        </LanguageProvider>
+      </body>
     </html>
   );
 }

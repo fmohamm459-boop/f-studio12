@@ -45,7 +45,7 @@ export default {
     // src/auth.ts (Node runtime), not here.
   ],
 
-  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? "f-studio-default-auth-secret-key-32chars-min",
 
   pages: {
     // Route Page_Structure.md §10 Admin Login as the sign-in surface,

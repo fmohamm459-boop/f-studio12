@@ -4,6 +4,7 @@ import { Footer } from "@/components/global/Footer";
 import { Button } from "@/components/ui/Button";
 import { validateReviewToken } from "@/lib/actions/review";
 import { ReviewReveal } from "./ReviewReveal";
+import { getServerTranslation } from "@/i18n/server";
 
 type ReviewPageProps = {
   params: { token: string };
@@ -33,6 +34,7 @@ export const metadata: Metadata = {
  * project's existing public-page convention).
  */
 export default async function ReviewPage({ params }: ReviewPageProps) {
+  const { dict } = await getServerTranslation();
   const project = await validateReviewToken(params.token);
 
   if (!project) {
@@ -43,19 +45,17 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
           <section className="px-4 py-24 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
               <p className="font-mono text-xs uppercase tracking-wide text-foreground/50">
-                Private review
+                {dict.review.badge}
               </p>
               <h1 className="mt-3 text-balance font-sans text-3xl font-semibold tracking-tight text-foreground">
-                This review link is no longer available
+                {dict.review.unavailableTitle}
               </h1>
               <p className="mt-4 text-pretty leading-relaxed text-foreground/70">
-                The link may have expired or may no longer be active. If you were
-                expecting to review a project, please reach out to your F Studio
-                contact for a fresh link.
+                {dict.review.unavailableDesc}
               </p>
               <div className="mt-8 flex justify-center">
                 <Button href="/contact" variant="secondary">
-                  Contact F Studio
+                  {dict.review.contactStudio}
                 </Button>
               </div>
             </div>
@@ -75,15 +75,13 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
         <section className="border-b border-border px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-3xl">
             <p className="font-mono text-xs uppercase tracking-wide text-foreground/50">
-              Private review
+              {dict.review.badge}
             </p>
             <h1 className="mt-4 text-balance font-sans text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
               {project.title}
             </h1>
             <p className="mt-4 max-w-xl text-pretty leading-relaxed text-foreground/70">
-              This page is a private preview of your project, shared with you by
-              F Studio. Expand the section below for details, the live link, and
-              any supporting files.
+              {dict.review.heroDesc}
             </p>
           </div>
         </section>

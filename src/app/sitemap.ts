@@ -48,10 +48,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     select: { slug: true, updatedAt: true },
   });
 
-  const projectEntries: MetadataRoute.Sitemap = publishedProjects.map((project) => ({
-    url: new URL(`/portfolio/${project.slug}`, SITE_URL).toString(),
-    lastModified: project.updatedAt,
-  }));
+  const projectEntries: MetadataRoute.Sitemap = publishedProjects.map(
+    (project: { slug: string; updatedAt: Date }) => ({
+      url: new URL(`/portfolio/${project.slug}`, SITE_URL).toString(),
+      lastModified: project.updatedAt,
+    }),
+  );
+
 
   return [...staticEntries, ...projectEntries];
 }

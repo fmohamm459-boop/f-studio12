@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "@/i18n/client";
 
 export type DataTableColumn<T> = {
   key: string;
@@ -30,17 +31,6 @@ type DataTableProps<T> = {
 
 type SortState = { key: string; direction: "asc" | "desc" } | null;
 
-/**
- * DataTable — admin Global Component (Component_List §15.4; Page_Structure
- * PART D "Data Table (Admin)"). Semantic <table> with <th scope>, aria-sort
- * on sortable headers, sticky header + sticky first column for mobile
- * horizontal scroll. Status is expected to be rendered by the caller's
- * column `render` as badge + text (never color alone). Bulk selection is
- * announced via a polite live region; destructive row actions require an
- * inline confirm step before `onSelect` fires — no data is created, updated,
- * or deleted here, this only demonstrates the confirm-dialog interaction
- * pattern against static mock rows.
- */
 export function DataTable<T>({
   caption,
   columns,
@@ -49,8 +39,10 @@ export function DataTable<T>({
   getRowLabel,
   rowActions,
   selectable = false,
-  emptyMessage = "No results.",
+  emptyMessage,
 }: DataTableProps<T>) {
+  const { t } = useTranslation();
+  const resolvedEmptyMessage = emptyMessage ?? t.dataTable.noResults;
   const [sort, setSort] = useState<SortState>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
@@ -98,7 +90,7 @@ export function DataTable<T>({
     <div className="rounded-[var(--radius-lg)] border border-border bg-surface-elevated">
       {selectable ? (
         <p role="status" className="border-b border-border px-4 py-2.5 text-xs text-foreground/60">
-          <span className="numeral-ltr">{selected.size}</span> selected
+          <span className="numeral-ltr">{selected.size}</span> {t.dataTable.selectedCount}
         </p>
       ) : null}
 
@@ -119,7 +111,7 @@ export function DataTable<T>({
                       if (el) el.indeterminate = someSelected;
                     }}
                     onChange={toggleAll}
-                    aria-label="Select all rows"
+                    aria-label={t.dataTable.selectAllRows}
                     className="h-[18px] w-[18px] rounded-[4px] border-border align-middle accent-primary"
                   />
                 </th>
@@ -170,7 +162,7 @@ export function DataTable<T>({
               })}
               {rowActions && rowActions.length > 0 ? (
                 <th scope="col" className="p-3 text-end font-mono text-xs uppercase tracking-wide text-foreground/60">
-                  Actions
+                  {t.dataTable.actionsCol}
                 </th>
               ) : null}
             </tr>
@@ -182,7 +174,7 @@ export function DataTable<T>({
                   colSpan={columns.length + (selectable ? 1 : 0) + (rowActions ? 1 : 0)}
                   className="p-8 text-center text-sm text-foreground/60"
                 >
-                  {emptyMessage}
+                  {resolvedEmptyMessage}
                 </td>
               </tr>
             ) : (
@@ -197,7 +189,7 @@ export function DataTable<T>({
                           type="checkbox"
                           checked={selected.has(id)}
                           onChange={() => toggleRow(id)}
-                          aria-label={`Select ${getRowLabel(row)}`}
+                          aria-label={t.dataTable.selectRow.replace("{label}", getRowLabel(row))}
                           className="h-[18px] w-[18px] rounded-[4px] border-border align-middle accent-primary"
                         />
                       </td>
@@ -219,7 +211,9 @@ export function DataTable<T>({
                       <td className="p-3 text-end">
                         {isPendingDelete ? (
                           <div role="status" className="flex items-center justify-end gap-2">
-                            <span className="text-xs text-foreground/70">Delete {getRowLabel(row)}?</span>
+                            <span className="text-xs text-foreground/70">
+                              {t.dataTable.deletePrompt.replace("{label}", getRowLabel(row))}
+                            </span>
                             <button
                               type="button"
                               onClick={() => {
@@ -229,14 +223,14 @@ export function DataTable<T>({
                               }}
                               className="min-h-[44px] rounded-[var(--radius-lg)] bg-primary px-3 text-xs font-medium text-primary-foreground"
                             >
-                              Confirm
+                              {t.dataTable.confirm}
                             </button>
                             <button
                               type="button"
                               onClick={() => setPendingDeleteId(null)}
                               className="min-h-[44px] rounded-[var(--radius-lg)] border border-border px-3 text-xs font-medium text-foreground/80"
                             >
-                              Cancel
+                              {t.dataTable.cancel}
                             </button>
                           </div>
                         ) : (

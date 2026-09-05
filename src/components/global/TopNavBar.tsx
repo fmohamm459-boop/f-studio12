@@ -4,23 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
-
-const NAV_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Brand Identity", href: "/brand-identity" },
-  { label: "Services", href: "/services" },
-  { label: "Portfolio", href: "/portfolio" },
-  { label: "Testimonials", href: "/testimonials" },
-  { label: "Contact", href: "/contact" },
-];
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useTranslation } from "@/i18n/client";
 
 /**
- * TopNavBar — public global component (Page_Structure PART A, every page).
- * One wordmark instance (UI_Guidelines §18.1/§18.2 — set as text here as a
- * foundation-stage stand-in for the SVG wordmark asset, which is not yet
- * supplied per public/assets/logo/README.md). Mobile disclosure uses Framer
- * Motion for a functional, quiet transition only (UI_Guidelines §19.2).
+ * TopNavBar — public global component.
+ * Supports dynamic localization (EN/AR), LTR/RTL responsiveness,
+ * and preserves SiteSettings branding (logoUrl & siteName).
  */
 export function TopNavBar({
   logoUrl,
@@ -30,28 +20,42 @@ export function TopNavBar({
   siteName?: string | null;
 }) {
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
+
+  const navLinks = [
+    { label: t("nav.home", "Home"), href: "/" },
+    { label: t("nav.about", "About"), href: "/about" },
+    { label: t("nav.brandIdentity", "Brand Identity"), href: "/brand-identity" },
+    { label: t("nav.services", "Services"), href: "/services" },
+    { label: t("nav.portfolio", "Portfolio"), href: "/portfolio" },
+    { label: t("nav.testimonials", "Testimonials"), href: "/testimonials" },
+    { label: t("nav.contact", "Contact"), href: "/contact" },
+  ];
 
   return (
-    <header role="banner" className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
+    <header
+      role="banner"
+      className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur"
+    >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link
-  href="/"
-  className="font-sans text-lg font-semibold tracking-tight text-foreground ltr:text-left rtl:text-right"
->
-  {logoUrl ? (
-  <img
-    src={logoUrl}
-    alt={siteName || "F Studio"}
-    className="h-8 w-auto object-contain"
-  />
-) : (
-  siteName || "F Studio"
-)}
-</Link>
+          href="/"
+          className="font-sans text-lg font-semibold tracking-tight text-foreground transition-opacity hover:opacity-90"
+        >
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt={siteName || "F Studio"}
+              className="h-8 w-auto object-contain"
+            />
+          ) : (
+            siteName || "F Studio"
+          )}
+        </Link>
 
-        <nav aria-label="Primary" className="hidden lg:block">
+        <nav aria-label={t("nav.menu", "Primary Navigation")} className="hidden lg:block">
           <ul className="flex items-center gap-6">
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
@@ -64,45 +68,49 @@ export function TopNavBar({
           </ul>
         </nav>
 
-        <div className="hidden lg:block">
+        <div className="hidden items-center gap-3 lg:flex">
+          <LanguageSwitcher />
           <Button href="/contact" variant="primary">
-            Start a project
+            {t("nav.startProject", "Start a project")}
           </Button>
         </div>
 
-        <button
-          type="button"
-          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--radius-lg)] text-foreground lg:hidden"
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-          aria-label={open ? "Close menu" : "Open menu"}
-          onClick={() => setOpen((prev) => !prev)}
-        >
-          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            {open ? (
-              <path
-                d="M5 5L15 15M15 5L5 15"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            ) : (
-              <path
-                d="M2.5 5H17.5M2.5 10H17.5M2.5 15H17.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            )}
-          </svg>
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <LanguageSwitcher className="text-[11px]" />
+          <button
+            type="button"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--radius-lg)] text-foreground"
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            aria-label={open ? t("common.close", "Close menu") : t("nav.menu", "Open menu")}
+            onClick={() => setOpen((prev) => !prev)}
+          >
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
+              {open ? (
+                <path
+                  d="M5 5L15 15M15 5L5 15"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              ) : (
+                <path
+                  d="M2.5 5H17.5M2.5 10H17.5M2.5 15H17.5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              )}
+            </svg>
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>
         {open ? (
           <motion.nav
             id="mobile-nav"
-            aria-label="Primary"
+            aria-label={t("nav.menu", "Primary Navigation")}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -110,12 +118,12 @@ export function TopNavBar({
             className="overflow-hidden border-t border-border lg:hidden"
           >
             <ul className="flex flex-col gap-1 px-4 py-4 sm:px-6">
-              {NAV_LINKS.map((link) => (
+              {navLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
                     onClick={() => setOpen(false)}
-                    className="flex min-h-[44px] items-center text-sm text-foreground/80 hover:text-foreground"
+                    className="flex min-h-[44px] items-center text-start text-sm text-foreground/80 transition-colors hover:text-foreground"
                   >
                     {link.label}
                   </Link>
@@ -123,7 +131,7 @@ export function TopNavBar({
               ))}
               <li className="pt-2">
                 <Button href="/contact" variant="primary" className="w-full">
-                  Start a project
+                  {t("nav.startProject", "Start a project")}
                 </Button>
               </li>
             </ul>

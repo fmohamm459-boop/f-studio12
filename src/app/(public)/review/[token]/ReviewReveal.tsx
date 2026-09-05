@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useTranslation } from "@/i18n/client";
 
 type ReviewRevealProps = {
   description: string;
@@ -59,20 +60,8 @@ function fileLabel(url: string, index: number): string {
   return `Resource ${index + 1}`;
 }
 
-/**
- * Interactive Reveal (Phase 9.3.11 Stage 2, Task 2/3). A single expandable
- * card — Component_List has no dedicated Accordion primitive yet, so this
- * follows the same expand/collapse mechanics as the admin Settings
- * accordion-style section nav (button + `aria-expanded`/`aria-controls`),
- * built as its own component here since this page's needs (external link,
- * file list) are specific to the review presentation.
- *
- * Animates height/opacity with framer-motion (already a project dependency,
- * used the same way in SideNavBar's mobile drawer) at the 120–180ms "quiet"
- * duration UI_Guidelines §19.2 specifies, and collapses to a instant toggle
- * under `prefers-reduced-motion`.
- */
 export function ReviewReveal({ description, projectLink, pdfFiles }: ReviewRevealProps) {
+  const { dict } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const panelId = useId();
   const prefersReducedMotion = useReducedMotion();
@@ -88,10 +77,10 @@ export function ReviewReveal({ description, projectLink, pdfFiles }: ReviewRevea
       >
         <span>
           <span className="block font-sans text-base font-semibold text-foreground">
-            Project details
+            {dict.review.projectDetails}
           </span>
           <span className="mt-0.5 block text-sm text-foreground/60">
-            Description, project link, and downloadable resources
+            {dict.review.projectDetailsDesc}
           </span>
         </span>
         <ChevronIcon
@@ -114,7 +103,7 @@ export function ReviewReveal({ description, projectLink, pdfFiles }: ReviewRevea
               {/* Project Information / Description */}
               <div>
                 <h2 className="font-sans text-lg font-semibold text-foreground">
-                  About this project
+                  {dict.review.aboutThisProject}
                 </h2>
                 <p className="mt-3 max-w-2xl text-pretty leading-relaxed text-foreground/70">
                   {description}
@@ -130,7 +119,7 @@ export function ReviewReveal({ description, projectLink, pdfFiles }: ReviewRevea
                     rel="noopener noreferrer"
                     className="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-lg)] bg-primary px-5 text-sm font-medium text-primary-foreground transition-opacity duration-150 hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                   >
-                    View project
+                    {dict.review.viewProject}
                     <ExternalLinkIcon />
                   </a>
                 </div>
@@ -139,7 +128,7 @@ export function ReviewReveal({ description, projectLink, pdfFiles }: ReviewRevea
               {/* Download Resources */}
               <div className="mt-10">
                 <h3 className="font-sans text-sm font-semibold uppercase tracking-wide text-foreground/60">
-                  Download resources
+                  {dict.review.downloadResources}
                 </h3>
 
                 {pdfFiles.length > 0 ? (
@@ -158,7 +147,7 @@ export function ReviewReveal({ description, projectLink, pdfFiles }: ReviewRevea
                             <span className="block truncate font-medium">
                               {fileLabel(url, index)}
                             </span>
-                            <span className="block text-xs text-foreground/50">Download PDF</span>
+                            <span className="block text-xs text-foreground/50">{dict.review.downloadPdf}</span>
                           </span>
                         </a>
                       </li>
@@ -166,7 +155,7 @@ export function ReviewReveal({ description, projectLink, pdfFiles }: ReviewRevea
                   </ul>
                 ) : (
                   <p className="mt-3 text-sm text-foreground/50">
-                    No resources have been shared for this project yet.
+                    {dict.review.noResources}
                   </p>
                 )}
               </div>

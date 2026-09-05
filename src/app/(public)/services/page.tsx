@@ -3,8 +3,9 @@ import { TopNavBarWrapper } from "@/components/global/TopNavBarWrapper";
 import { Footer } from "@/components/global/Footer";
 import { ServiceCard } from "@/components/content/ServiceCard";
 import { MonoChip } from "@/components/content/MonoChip";
-import { SERVICES } from "@/lib/services-content";
+import { getLocalizedServices } from "@/lib/services-content";
 import { LogoDesignIcon, BrandIdentityIcon, WebDevelopmentIcon, DataAnalysisIcon, AIIcon } from "@/lib/icons";
+import { getServerTranslation } from "@/i18n/server";
 
 const PAGE_TITLE = "Services — F Studio";
 const PAGE_DESCRIPTION = "Logo Design, Brand Identity, Website Development, Data Analysis, and AI.";
@@ -28,39 +29,33 @@ export const metadata: Metadata = {
 
 const SERVICE_ICONS = [LogoDesignIcon, BrandIdentityIcon, WebDevelopmentIcon, DataAnalysisIcon, AIIcon];
 
-const CAPABILITIES = [
-  {
-    title: "Technical Branding",
-    items: ["Logo & mark systems", "Color & type systems", "Guidelines documentation"],
-  },
-  {
-    title: "Design Engineering",
-    items: ["Next.js application builds", "Design-token-driven Tailwind systems", "Accessibility audits"],
-  },
-];
-
 const STACK = {
   Design: ["Figma", "Illustrator"],
   Engineering: ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
   Data: ["PostgreSQL", "Prisma"],
 };
 
-const FAQ = [
-  {
-    q: "How long does a typical engagement take?",
-    a: "Brand identity projects run 4–6 weeks; web builds typically run 6–10 weeks depending on scope.",
-  },
-  {
-    q: "Do you work with existing design systems?",
-    a: "Yes — we can extend an existing token system rather than starting from zero.",
-  },
-  {
-    q: "Can you support both English and Arabic (RTL)?",
-    a: "Yes — RTL/LTR support with logical CSS properties is standard on every build.",
-  },
-];
+export default async function ServicesPage() {
+  const { dict, locale } = await getServerTranslation();
+  const services = getLocalizedServices(locale);
 
-export default function ServicesPage() {
+  const capabilities = [
+    {
+      title: dict.services.technicalBranding,
+      items: dict.services.technicalBrandingItems,
+    },
+    {
+      title: dict.services.designEngineering,
+      items: dict.services.designEngineeringItems,
+    },
+  ];
+
+  const faq = [
+    { q: dict.services.faqQ1, a: dict.services.faqA1 },
+    { q: dict.services.faqQ2, a: dict.services.faqA2 },
+    { q: dict.services.faqQ3, a: dict.services.faqA3 },
+  ];
+
   return (
     <div className="flex min-h-dvh flex-col">
       <TopNavBarWrapper />
@@ -69,11 +64,10 @@ export default function ServicesPage() {
         <section className="border-b border-border px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-balance font-sans text-4xl font-semibold tracking-tight text-foreground">
-              Strategic design &amp; technical engineering
+              {dict.services.heroTitle}
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-pretty leading-relaxed text-foreground/70">
-              Five disciplines, presented with one consistent anatomy so you can compare them at a
-              glance.
+              {dict.services.heroSubtitle}
             </p>
           </div>
         </section>
@@ -81,9 +75,11 @@ export default function ServicesPage() {
         {/* Disciplines */}
         <section className="bg-surface px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-6xl">
-            <h2 className="font-sans text-2xl font-semibold text-foreground">Disciplines</h2>
+            <h2 className="font-sans text-2xl font-semibold text-foreground">
+              {dict.services.disciplines}
+            </h2>
             <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {SERVICES.map((service, index) => {
+              {services.map((service, index) => {
                 const Icon = SERVICE_ICONS[index];
                 return (
                   <ServiceCard
@@ -104,9 +100,11 @@ export default function ServicesPage() {
         {/* Capabilities */}
         <section className="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-5xl">
-            <h2 className="font-sans text-2xl font-semibold text-foreground">Capabilities</h2>
+            <h2 className="font-sans text-2xl font-semibold text-foreground">
+              {dict.services.capabilities}
+            </h2>
             <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
-              {CAPABILITIES.map((group) => (
+              {capabilities.map((group) => (
                 <div key={group.title} className="rounded-[var(--radius-lg)] border border-border p-8">
                   <h3 className="font-sans text-lg font-semibold text-foreground">{group.title}</h3>
                   <ul className="mt-4 flex flex-col gap-2 text-sm text-foreground/70">
@@ -125,7 +123,9 @@ export default function ServicesPage() {
         {/* Stack Expertise */}
         <section className="bg-surface px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-5xl">
-            <h2 className="font-sans text-2xl font-semibold text-foreground">Stack expertise</h2>
+            <h2 className="font-sans text-2xl font-semibold text-foreground">
+              {dict.services.stackExpertise}
+            </h2>
             <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3">
               {Object.entries(STACK).map(([group, tools]) => (
                 <div key={group}>
@@ -145,10 +145,10 @@ export default function ServicesPage() {
         <section className="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-3xl">
             <h2 className="font-sans text-2xl font-semibold text-foreground">
-              Frequently asked questions
+              {dict.services.faqTitle}
             </h2>
             <div className="mt-8 flex flex-col divide-y divide-border rounded-[var(--radius-lg)] border border-border">
-              {FAQ.map((item) => (
+              {faq.map((item) => (
                 <details key={item.q} className="group p-6">
                   <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium text-foreground">
                     <span className="text-start">{item.q}</span>

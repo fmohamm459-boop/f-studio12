@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/i18n/client";
 
 type Breadcrumb = {
   label: string;
@@ -54,22 +55,21 @@ function MoonIcon() {
   );
 }
 
-/**
- * AdminHeader — admin Global Component (Component_List §15.2; Page_Structure
- * §12–§16 "Global Components: SideNavBar, Admin Header").
- * Renders the page's single <h1> on reading-start; notifications, language,
- * and theme toggles sit on reading-end and collapse into an overflow menu on
- * small screens. No auth/session logic — the theme toggle only flips the
- * existing `.dark` token set already defined in globals.css, and the language
- * control is a static EN/AR label (no i18n routing wired at this stage).
- */
 export function AdminHeader({ title, breadcrumbs, unreadNotifications = 2 }: AdminHeaderProps) {
   const [isDark, setIsDark] = useState(false);
-  const [lang, setLang] = useState<"EN" | "AR">("EN");
+  const { t, locale, setLocale } = useTranslation();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
   }, [isDark]);
+
+  const toggleLanguage = () => {
+    setLocale(locale === "en" ? "ar" : "en");
+  };
+
+  const currentLangDisplay = locale === "en" ? "EN" : "AR";
+  const switchLangAria =
+    locale === "en" ? "Switch language to Arabic" : "التبديل إلى الإنجليزية";
 
   return (
     <header
@@ -97,7 +97,7 @@ export function AdminHeader({ title, breadcrumbs, unreadNotifications = 2 }: Adm
         <button
           type="button"
           className="relative flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--radius-lg)] text-foreground/80 hover:bg-surface hover:text-foreground"
-          aria-label={`Notifications, ${unreadNotifications} unread`}
+          aria-label={`${t.admin.notifications}, ${unreadNotifications}`}
         >
           <BellIcon />
           {unreadNotifications > 0 ? (
@@ -112,11 +112,11 @@ export function AdminHeader({ title, breadcrumbs, unreadNotifications = 2 }: Adm
 
         <button
           type="button"
-          onClick={() => setLang((prev) => (prev === "EN" ? "AR" : "EN"))}
+          onClick={toggleLanguage}
           className="flex min-h-[44px] items-center justify-center rounded-[var(--radius-lg)] px-3 font-mono text-xs uppercase text-foreground/80 hover:bg-surface hover:text-foreground"
-          aria-label={`Language, currently ${lang === "EN" ? "English" : "Arabic"}`}
+          aria-label={switchLangAria}
         >
-          {lang}
+          {currentLangDisplay}
         </button>
 
         <button
@@ -124,7 +124,7 @@ export function AdminHeader({ title, breadcrumbs, unreadNotifications = 2 }: Adm
           onClick={() => setIsDark((prev) => !prev)}
           aria-pressed={isDark}
           className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--radius-lg)] text-foreground/80 hover:bg-surface hover:text-foreground"
-          aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
+          aria-label={isDark ? t.admin.switchThemeLight : t.admin.switchThemeDark}
         >
           {isDark ? <MoonIcon /> : <SunIcon />}
         </button>
@@ -133,7 +133,7 @@ export function AdminHeader({ title, breadcrumbs, unreadNotifications = 2 }: Adm
       {/* Overflow menu, below sm */}
       <details className="relative sm:hidden">
         <summary
-          aria-label="More header controls"
+          aria-label={t.admin.moreHeaderControls}
           className="flex min-h-[44px] min-w-[44px] list-none items-center justify-center rounded-[var(--radius-lg)] text-foreground/80 [&::-webkit-details-marker]:hidden"
         >
           <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -146,22 +146,23 @@ export function AdminHeader({ title, breadcrumbs, unreadNotifications = 2 }: Adm
           <button
             type="button"
             className="flex min-h-[44px] items-center gap-2.5 rounded-[var(--radius-lg)] px-2.5 text-sm text-foreground/80 hover:bg-surface"
-            aria-label={`Notifications, ${unreadNotifications} unread`}
+            aria-label={`${t.admin.notifications}, ${unreadNotifications}`}
           >
             <BellIcon />
             <span>
-              Notifications <span className="numeral-ltr">({unreadNotifications})</span>
+              {t.admin.notifications} <span className="numeral-ltr">({unreadNotifications})</span>
             </span>
           </button>
           <button
             type="button"
-            onClick={() => setLang((prev) => (prev === "EN" ? "AR" : "EN"))}
+            onClick={toggleLanguage}
             className="flex min-h-[44px] items-center gap-2.5 rounded-[var(--radius-lg)] px-2.5 text-sm text-foreground/80 hover:bg-surface"
+            aria-label={switchLangAria}
           >
             <span aria-hidden="true" className="font-mono text-xs uppercase">
-              {lang}
+              {currentLangDisplay}
             </span>
-            <span>Language</span>
+            <span>{t.admin.languageLabel}</span>
           </button>
           <button
             type="button"
@@ -170,7 +171,7 @@ export function AdminHeader({ title, breadcrumbs, unreadNotifications = 2 }: Adm
             className="flex min-h-[44px] items-center gap-2.5 rounded-[var(--radius-lg)] px-2.5 text-sm text-foreground/80 hover:bg-surface"
           >
             {isDark ? <MoonIcon /> : <SunIcon />}
-            <span>{isDark ? "Dark theme" : "Light theme"}</span>
+            <span>{isDark ? t.admin.darkTheme : t.admin.lightTheme}</span>
           </button>
         </div>
       </details>

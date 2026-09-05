@@ -3,6 +3,7 @@ import { TopNavBarWrapper } from "@/components/global/TopNavBarWrapper";
 import { Footer } from "@/components/global/Footer";
 import { StatWidget } from "@/components/data/StatWidget";
 import { MonoChip } from "@/components/content/MonoChip";
+import { getServerTranslation } from "@/i18n/server";
 
 const PAGE_TITLE = "About — F Studio";
 const PAGE_DESCRIPTION = "Studio philosophy, mission, and process behind F Studio's work.";
@@ -24,22 +25,6 @@ export const metadata: Metadata = {
   },
 };
 
-const VALUES = [
-  { title: "Mission", body: "Build digital work that is as considered under the hood as it looks on the surface." },
-  { title: "Vision", body: "A studio where brand, code, data, and AI are practiced as one discipline." },
-];
-
-const PROCESS_STEPS = [
-  "Discovery call",
-  "Research & audit",
-  "Direction & concepts",
-  "Design system",
-  "Build",
-  "Content & data wiring",
-  "QA & accessibility pass",
-  "Launch & handoff",
-];
-
 const TOOL_STACK = {
   Design: ["Figma", "Illustrator"],
   Dev: ["Next.js", "TypeScript", "Tailwind CSS"],
@@ -47,13 +32,35 @@ const TOOL_STACK = {
   AI: ["Claude", "Custom assistants"],
 };
 
-const METRICS = [
-  { label: "Projects delivered", value: "60+" },
-  { label: "Avg. client rating", value: "4.9/5" },
-  { label: "Repeat client rate", value: "68%", trend: { direction: "up" as const, text: "vs. last year" } },
-];
+export default async function AboutPage() {
+  const { dict } = await getServerTranslation();
 
-export default function AboutPage() {
+  const values = [
+    { title: dict.about.missionTitle, body: dict.about.missionBody },
+    { title: dict.about.visionTitle, body: dict.about.visionBody },
+  ];
+
+  const processSteps = [
+    dict.about.processStep1,
+    dict.about.processStep2,
+    dict.about.processStep3,
+    dict.about.processStep4,
+    dict.about.processStep5,
+    dict.about.processStep6,
+    dict.about.processStep7,
+    dict.about.processStep8,
+  ];
+
+  const metrics = [
+    { label: dict.about.metricProjectsDelivered, value: "60+" },
+    { label: dict.about.metricClientRating, value: "4.9/5" },
+    {
+      label: dict.about.metricRepeatClientRate,
+      value: "68%",
+      trend: { direction: "up" as const, text: dict.about.metricVsLastYear },
+    },
+  ];
+
   return (
     <div className="flex min-h-dvh flex-col">
       <TopNavBarWrapper />
@@ -62,18 +69,17 @@ export default function AboutPage() {
         <section className="border-b border-border px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-balance font-sans text-4xl font-semibold tracking-tight text-foreground">
-              Strategic design &amp; technical engineering
+              {dict.about.heroTitle}
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-pretty leading-relaxed text-foreground/70">
-              F Studio exists at the intersection of brand craft and software engineering — one
-              team, one system, from identity through to production data.
+              {dict.about.heroSubtitle}
             </p>
           </div>
         </section>
 
         <section className="bg-surface px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2">
-            {VALUES.map((value) => (
+            {values.map((value) => (
               <div key={value.title} className="rounded-[var(--radius-lg)] border border-border bg-surface-elevated p-8">
                 <h2 className="font-sans text-lg font-semibold text-foreground">{value.title}</h2>
                 <p className="mt-3 text-pretty leading-relaxed text-foreground/70">{value.body}</p>
@@ -84,9 +90,11 @@ export default function AboutPage() {
 
         <section className="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-5xl">
-            <h2 className="font-sans text-2xl font-semibold text-foreground">Working process</h2>
+            <h2 className="font-sans text-2xl font-semibold text-foreground">
+              {dict.about.workingProcess}
+            </h2>
             <ol className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {PROCESS_STEPS.map((step, index) => (
+              {processSteps.map((step, index) => (
                 <li
                   key={step}
                   className="rounded-[var(--radius-lg)] border border-border p-5"
@@ -103,7 +111,9 @@ export default function AboutPage() {
 
         <section className="bg-surface px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-5xl">
-            <h2 className="font-sans text-2xl font-semibold text-foreground">Technical ecosystem</h2>
+            <h2 className="font-sans text-2xl font-semibold text-foreground">
+              {dict.about.technicalEcosystem}
+            </h2>
             <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {Object.entries(TOOL_STACK).map(([group, tools]) => (
                 <div key={group}>
@@ -121,9 +131,11 @@ export default function AboutPage() {
 
         <section className="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-5xl">
-            <h2 className="font-sans text-2xl font-semibold text-foreground">Client success metrics</h2>
+            <h2 className="font-sans text-2xl font-semibold text-foreground">
+              {dict.about.clientSuccessMetrics}
+            </h2>
             <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3">
-              {METRICS.map((metric) => (
+              {metrics.map((metric) => (
                 <StatWidget key={metric.label} label={metric.label} value={metric.value} trend={metric.trend} />
               ))}
             </div>

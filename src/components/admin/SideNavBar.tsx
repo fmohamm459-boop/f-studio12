@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { logoutAction } from "@/lib/actions/auth";
+import { useTranslation } from "@/i18n/client";
 
 export type AdminNavKey =
   | "dashboard"
@@ -14,7 +15,6 @@ export type AdminNavKey =
 
 type NavItem = {
   key: AdminNavKey;
-  label: string;
   href: string;
   icon: (props: { className?: string }) => React.ReactElement;
 };
@@ -94,38 +94,27 @@ function LogoutIcon({ className }: { className?: string }) {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { key: "dashboard", label: "Dashboard", href: "/admin/dashboard", icon: DashboardIcon },
-  { key: "projects", label: "Projects", href: "/admin/projects", icon: ProjectsIcon },
-  { key: "messages", label: "Messages", href: "/admin/messages", icon: MessagesIcon },
-  { key: "testimonials", label: "Testimonials", href: "/admin/testimonials", icon: TestimonialsIcon },
-  { key: "settings", label: "Settings", href: "/admin/settings", icon: SettingsIcon },
+  { key: "dashboard", href: "/admin/dashboard", icon: DashboardIcon },
+  { key: "projects", href: "/admin/projects", icon: ProjectsIcon },
+  { key: "messages", href: "/admin/messages", icon: MessagesIcon },
+  { key: "testimonials", href: "/admin/testimonials", icon: TestimonialsIcon },
+  { key: "settings", href: "/admin/settings", icon: SettingsIcon },
 ];
 
 type SideNavBarProps = {
   active: AdminNavKey;
 };
 
-/**
- * SideNavBar — admin Global Component (Component_List §15.1; Page_Structure
- * §12–§16 "Global Components: SideNavBar, Admin Header").
- * Persistent at lg+, slide-in drawer below lg, anchored to reading-start
- * (logical `start-0`/`ps-*`, mirrors correctly in RTL without extra rules).
- * Active item shown via an indicator bar + font-weight (aria-current), never
- * color alone. Logout is a separated, labeled action, now wired to
- * `logoutAction` (Phase 9.3.10-B, "Authentication Completion & Final
- * Verification", Task 3) via a plain `<form action={logoutAction}>` around
- * each pre-existing button — no other markup/layout/styling changed, per
- * that task's "Do NOT redesign SideNavBar" instruction; the wordmark stays
- * LTR and never mirrors.
- */
 export function SideNavBar({ active }: SideNavBarProps) {
   const [open, setOpen] = useState(false);
+  const { t, isRtl } = useTranslation();
 
   const nav = (
-    <nav aria-label="Admin navigation" className="flex flex-1 flex-col gap-1 p-3">
+    <nav aria-label={t.admin.navAria} className="flex flex-1 flex-col gap-1 p-3">
       {NAV_ITEMS.map((item) => {
         const isActive = item.key === active;
         const Icon = item.icon;
+        const label = t.admin[item.key] ?? item.key;
         return (
           <Link
             key={item.key}
@@ -145,7 +134,7 @@ export function SideNavBar({ active }: SideNavBarProps) {
               />
             ) : null}
             <Icon className="shrink-0 text-foreground/70" />
-            <span>{item.label}</span>
+            <span>{label}</span>
           </Link>
         );
       })}
@@ -171,10 +160,10 @@ export function SideNavBar({ active }: SideNavBarProps) {
             <button
               type="submit"
               className="flex min-h-[44px] w-full items-center gap-3 rounded-[var(--radius-lg)] ps-4 pe-3 text-sm font-medium text-foreground/70 transition-colors duration-150 hover:bg-surface hover:text-foreground"
-              aria-label="Log out of the admin dashboard"
+              aria-label={t.admin.logoutAria}
             >
               <LogoutIcon className="shrink-0" />
-              <span>Log out</span>
+              <span>{t.admin.logout}</span>
             </button>
           </form>
         </div>
@@ -186,7 +175,7 @@ export function SideNavBar({ active }: SideNavBarProps) {
         onClick={() => setOpen(true)}
         aria-expanded={open}
         aria-controls="admin-mobile-nav"
-        aria-label="Open admin navigation"
+        aria-label={t.admin.openNav}
         className="fixed bottom-4 start-4 z-40 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--radius-lg)] border border-border bg-surface-elevated text-foreground shadow-[var(--shadow-md)] lg:hidden"
       >
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -205,7 +194,7 @@ export function SideNavBar({ active }: SideNavBarProps) {
           >
             <button
               type="button"
-              aria-label="Close admin navigation"
+              aria-label={t.admin.closeNav}
               onClick={() => setOpen(false)}
               className="absolute inset-0 bg-ink/40"
             />
@@ -213,12 +202,12 @@ export function SideNavBar({ active }: SideNavBarProps) {
               id="admin-mobile-nav"
               role="dialog"
               aria-modal="true"
-              aria-label="Admin navigation"
-              initial={{ x: "-100%" }}
+              aria-label={t.admin.navAria}
+              initial={{ x: isRtl ? "100%" : "-100%" }}
               animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
+              exit={{ x: isRtl ? "100%" : "-100%" }}
               transition={{ duration: 0.18 }}
-              className="absolute inset-y-0 start-0 flex w-72 max-w-[80vw] flex-col bg-surface-elevated rtl:[transform-origin:right]"
+              className="absolute inset-y-0 start-0 flex w-72 max-w-[80vw] flex-col bg-surface-elevated"
             >
               <div className="flex h-16 items-center justify-between border-b border-border px-5">
                 <span dir="ltr" className="font-sans text-lg font-semibold tracking-tight text-foreground">
@@ -227,7 +216,7 @@ export function SideNavBar({ active }: SideNavBarProps) {
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  aria-label="Close admin navigation"
+                  aria-label={t.admin.closeNav}
                   className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--radius-lg)] text-foreground"
                 >
                   <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -241,10 +230,10 @@ export function SideNavBar({ active }: SideNavBarProps) {
                   <button
                     type="submit"
                     className="flex min-h-[44px] w-full items-center gap-3 rounded-[var(--radius-lg)] ps-4 pe-3 text-sm font-medium text-foreground/70 hover:bg-surface hover:text-foreground"
-                    aria-label="Log out of the admin dashboard"
+                    aria-label={t.admin.logoutAria}
                   >
                     <LogoutIcon className="shrink-0" />
-                    <span>Log out</span>
+                    <span>{t.admin.logout}</span>
                   </button>
                 </form>
               </div>

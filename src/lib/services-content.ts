@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/config";
+
 // Static content for the five fixed F Studio services (Component_List §14.1).
 // Not a database entity — services are a fixed set per the locked scope.
 
@@ -9,7 +11,7 @@ export type ServiceContent = {
   ctaLabel: string;
 };
 
-export const SERVICES: ServiceContent[] = [
+export const SERVICES_EN: ServiceContent[] = [
   {
     slug: "logo-design",
     title: "Logo Design",
@@ -66,3 +68,67 @@ export const SERVICES: ServiceContent[] = [
     ctaLabel: "See AI work",
   },
 ];
+
+export const SERVICES_AR: ServiceContent[] = [
+  {
+    slug: "logo-design",
+    title: "تصميم الشعارات",
+    description: "علامات مميزة مصممة لتصمد وتبرز من الأيقونات المصغرة (Favicon) وحتى لافتات المباني.",
+    benefits: [
+      "نسخ للعلامة النصية والمونوغرام والتراكيب الرأسية",
+      "اختبار الوضوح بدقة حتى مقاس 16 بكسل",
+      "تشمل نسخاً مخصصة للخلفيات الفاتحة والداكنة",
+    ],
+    ctaLabel: "طلب خدمات الهوية",
+  },
+  {
+    slug: "brand-identity",
+    title: "الهوية البصرية",
+    description: "نظام متكامل يشمل الألوان والطباعة وقواعد التطبيق، وليس مجرد شعار.",
+    benefits: [
+      "نظام الألوان والخطوط مع إرشادات الاستخدام الدقيقة",
+      "نماذج تطبيق واقعية على كافة نقاط الاتصال",
+      "دليل إرشادي شامل يمكن لفريقكم اعتماده وتسليمه",
+    ],
+    ctaLabel: "طلب خدمات الهوية",
+  },
+  {
+    slug: "website-development",
+    title: "تطوير المواقع والمنصات",
+    description: "مواقع سريعة وسهلة الوصول مبنية بتقنية Next.js، مصممة لأعلى درجات الاستدامة.",
+    benefits: [
+      "بنية عالية الأداء مع معالجة متقدمة واستجابة للصور",
+      "معايير سهولة الوصول WCAG 2.2 AA كركيزة أساسية وليست خياراً إضافياً",
+      "دعم كامل وفوري لاتجاهي LTR وRTL من أول مكوّن",
+    ],
+    ctaLabel: "بدء مشروع",
+  },
+  {
+    slug: "data-analysis",
+    title: "تحليل البيانات ولوحات التحكم",
+    description: "لوحات تحكم ذكية تستبدل الجداول المشتتة برؤية بصرية موحدة وواضحة.",
+    benefits: [
+      "كتل إحصائية ورسوم بيانية مع بدائل وصول رقمية سهلة القراءة",
+      "لوحة ألوان متوازنة مع خط تمييزي واحد للأرقام الحيوية",
+      "مصممة بدقة حول المقاييس التي يتابعها فريقكم يومياً",
+    ],
+    ctaLabel: "استعراض أعمال البيانات",
+  },
+  {
+    slug: "artificial-intelligence",
+    title: "الذكاء الاصطناعي",
+    description: "ميزات وحلول ذكاء اصطناعي عملية تركز على النتائج الحقيقية وتجنب المظاهر الزائفة.",
+    benefits: [
+      "مساعدات ذكية وأتمتة مخصصة لتدفقات العمل الفعلية",
+      "مخرجات واضحة وقابلة للتفسير بعيداً عن الصناديق المغلقة",
+      "نفس الطابع الهادئ والاحترافي المعتمد في أنظمة البيانات لدينا",
+    ],
+    ctaLabel: "استعراض أعمال الذكاء الاصطناعي",
+  },
+];
+
+export const SERVICES: ServiceContent[] = SERVICES_EN;
+
+export function getLocalizedServices(locale: Locale): ServiceContent[] {
+  return locale === "ar" ? SERVICES_AR : SERVICES_EN;
+}

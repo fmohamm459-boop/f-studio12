@@ -3,22 +3,24 @@
 import { useMemo, useState } from "react";
 import { ProjectCard } from "@/components/content/ProjectCard";
 import type { Project, ProjectCategory } from "@/lib/mock-data";
+import { useTranslation } from "@/i18n/client";
 
 type PortfolioBrowserProps = {
   projects: Project[];
 };
 
-const CATEGORIES: (ProjectCategory | "All")[] = ["All", "Branding", "Web Development", "Data Analysis", "AI"];
-
-/**
- * Page-local interactivity for the Portfolio listing (Component_List §13.11
- * Filtering & Search UX). Kept colocated with this route rather than added
- * to src/components — it wraps the existing ProjectCard rather than
- * introducing a new reusable design-system component.
- */
 export function PortfolioBrowser({ projects }: PortfolioBrowserProps) {
-  const [category, setCategory] = useState<(typeof CATEGORIES)[number]>("All");
+  const { dict } = useTranslation();
+  const [category, setCategory] = useState<ProjectCategory | "All">("All");
   const [query, setQuery] = useState("");
+
+  const categories: { key: ProjectCategory | "All"; label: string }[] = [
+    { key: "All", label: dict.portfolio.filterAll },
+    { key: "Branding", label: dict.portfolio.filterBranding },
+    { key: "Web Development", label: dict.portfolio.filterWebDev },
+    { key: "Data Analysis", label: dict.portfolio.filterDataAnalysis },
+    { key: "AI", label: dict.portfolio.filterAi },
+  ];
 
   const filtered = useMemo(() => {
     return projects.filter((project) => {
@@ -47,35 +49,35 @@ export function PortfolioBrowser({ projects }: PortfolioBrowserProps) {
             <path d="M13 13L10.5 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
           <label htmlFor="portfolio-search" className="sr-only">
-            Search projects
+            {dict.portfolio.searchLabel}
           </label>
           <input
             id="portfolio-search"
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search projects"
+            placeholder={dict.portfolio.searchPlaceholder}
             className="min-h-[44px] w-full rounded-[var(--radius-lg)] border border-border bg-surface-elevated ps-10 pe-4 text-sm text-foreground placeholder:text-foreground/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           />
         </div>
 
-        <div role="tablist" aria-label="Project category" className="flex flex-wrap gap-2">
-          {CATEGORIES.map((cat) => {
-            const active = cat === category;
+        <div role="tablist" aria-label={dict.portfolio.projectCategory} className="flex flex-wrap gap-2">
+          {categories.map((cat) => {
+            const active = cat.key === category;
             return (
               <button
-                key={cat}
+                key={cat.key}
                 type="button"
                 role="tab"
                 aria-selected={active}
-                onClick={() => setCategory(cat)}
+                onClick={() => setCategory(cat.key)}
                 className={`min-h-[44px] rounded-[var(--radius-lg)] border px-4 text-sm font-medium transition-colors duration-150 ${
                   active
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border bg-transparent text-foreground/80 hover:bg-surface"
                 }`}
               >
-                {cat}
+                {cat.label}
               </button>
             );
           })}
@@ -83,7 +85,9 @@ export function PortfolioBrowser({ projects }: PortfolioBrowserProps) {
       </div>
 
       <p role="status" className="mt-4 text-sm text-foreground/60">
-        <span className="numeral-ltr">{filtered.length}</span> project{filtered.length === 1 ? "" : "s"}
+        <span className="numeral-ltr">
+          {`${filtered.length} ${filtered.length === 1 ? dict.portfolio.countSingular : dict.portfolio.countPlural}`}
+        </span>
       </p>
 
       {filtered.length > 0 ? (
@@ -97,12 +101,13 @@ export function PortfolioBrowser({ projects }: PortfolioBrowserProps) {
               client={project.client}
               description={project.summary}
               tags={project.tags}
+              viewProjectText={dict.portfolio.viewProject}
             />
           ))}
         </div>
       ) : (
         <div className="mt-10 flex flex-col items-center gap-4 rounded-[var(--radius-lg)] border border-border p-12 text-center">
-          <p className="text-sm text-foreground/70">No projects match your filters.</p>
+          <p className="text-sm text-foreground/70">{dict.portfolio.noProjectsMatch}</p>
           <button
             type="button"
             onClick={() => {
@@ -111,7 +116,7 @@ export function PortfolioBrowser({ projects }: PortfolioBrowserProps) {
             }}
             className="min-h-[44px] rounded-[var(--radius-lg)] border border-border px-5 text-sm font-medium text-foreground hover:bg-surface"
           >
-            Clear filters
+            {dict.portfolio.clearFilters}
           </button>
         </div>
       )}

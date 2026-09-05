@@ -10,6 +10,7 @@ type ProjectCardProps = {
   tags: string[];
   /** 16:9 by default; logo-only showcases use 1:1 (Component_List §13.2). */
   ratio?: "16:9" | "1:1";
+  viewProjectText?: string;
 };
 
 const VISIBLE_TAG_LIMIT = 4;
@@ -27,6 +28,7 @@ export function ProjectCard({
   description,
   tags,
   ratio = "16:9",
+  viewProjectText = "View project",
 }: ProjectCardProps) {
   const visibleTags = tags.slice(0, VISIBLE_TAG_LIMIT);
   const overflow = tags.length - visibleTags.length;
@@ -56,7 +58,7 @@ export function ProjectCard({
           {overflow > 0 ? <MonoChip>{`+${overflow}`}</MonoChip> : null}
         </div>
         <span className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
-          View project
+          {viewProjectText}
           <svg
             aria-hidden="true"
             width="14"

@@ -7,6 +7,7 @@ import { MonoChip } from "@/components/content/MonoChip";
 import { StatWidget } from "@/components/data/StatWidget";
 import { Button } from "@/components/ui/Button";
 import { getProjectBySlug, getProjectSlugs, getProjects } from "@/lib/data/projects";
+import { getServerTranslation } from "@/i18n/server";
 
 // Phase 9.3.14-D, Task 1 — Public Project Media Rendering. Cosmetic-only
 // filename derivation for a stored Cloudinary file URL (same approach as
@@ -92,14 +93,8 @@ export async function generateMetadata({ params }: ProjectDetailsPageProps): Pro
   };
 }
 
-const NARRATIVE_ORDER: { key: "overview" | "challenge" | "research" | "solution"; label: string }[] = [
-  { key: "overview", label: "Overview" },
-  { key: "challenge", label: "Challenge" },
-  { key: "research", label: "Research & direction" },
-  { key: "solution", label: "Solution" },
-];
-
 export default async function ProjectDetailsPage({ params }: ProjectDetailsPageProps) {
+  const { dict } = await getServerTranslation();
   const allProjects = await getProjects();
   const index = allProjects.findIndex((item) => item.slug === params.slug);
   const project = allProjects[index];
@@ -112,6 +107,21 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
   }
 
   const nextProject = allProjects[(index + 1) % allProjects.length];
+
+  const narrativeOrder: { key: "overview" | "challenge" | "research" | "solution"; label: string }[] = [
+    { key: "overview", label: dict.portfolio.overview },
+    { key: "challenge", label: dict.portfolio.challenge },
+    { key: "research", label: dict.portfolio.research },
+    { key: "solution", label: dict.portfolio.solution },
+  ];
+
+  const metadataItems = [
+    { label: dict.portfolio.client, value: project.client },
+    { label: dict.portfolio.category, value: project.category },
+    { label: dict.portfolio.year, value: project.year },
+    { label: dict.portfolio.role, value: project.role },
+    ...(project.liveLink ? [{ label: dict.portfolio.link, value: dict.portfolio.liveSite }] : []),
+  ];
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -149,18 +159,12 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
         {/* Metadata */}
         <section className="bg-surface px-4 py-10 sm:px-6 lg:px-8">
           <div className="mx-auto grid max-w-5xl grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
-            {[
-              { label: "Client", value: project.client },
-              { label: "Category", value: project.category },
-              { label: "Year", value: project.year },
-              { label: "Role", value: project.role },
-              ...(project.liveLink ? [{ label: "Link", value: "Live site" }] : []),
-            ].map((item) => (
+            {metadataItems.map((item) => (
               <div key={item.label}>
                 <p className="text-xs font-medium uppercase tracking-wide text-foreground/50">
                   {item.label}
                 </p>
-                {item.label === "Link" && project.liveLink ? (
+                {item.label === dict.portfolio.link && project.liveLink ? (
                   <a
                     href={project.liveLink}
                     target="_blank"
@@ -180,7 +184,7 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
         {/* Narrative */}
         <section className="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto flex max-w-5xl flex-col gap-12">
-            {NARRATIVE_ORDER.map((section) => (
+            {narrativeOrder.map((section) => (
               <div key={section.key}>
                 <h2 className="font-sans text-xl font-semibold text-foreground">{section.label}</h2>
                 <p className="mt-3 max-w-3xl text-pretty leading-relaxed text-foreground/70">
@@ -195,7 +199,7 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
         {project.galleryImages && project.galleryImages.length > 0 ? (
           <section className="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
             <div className="mx-auto max-w-5xl">
-              <h2 className="font-sans text-xl font-semibold text-foreground">Gallery</h2>
+              <h2 className="font-sans text-xl font-semibold text-foreground">{dict.portfolio.gallery}</h2>
               <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
                 {project.galleryImages.map((url, index) => (
                   <div
@@ -219,14 +223,14 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
         {/* Before / After */}
         <section className="bg-surface px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-5xl">
-            <h2 className="font-sans text-xl font-semibold text-foreground">Before &amp; after</h2>
+            <h2 className="font-sans text-xl font-semibold text-foreground">{dict.portfolio.beforeAndAfter}</h2>
             <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
-                <p className="mb-2 text-sm font-medium text-foreground/70">Before</p>
+                <p className="mb-2 text-sm font-medium text-foreground/70">{dict.portfolio.before}</p>
                 <div className="aspect-video rounded-[var(--radius-lg)] border border-border bg-surface-elevated" aria-hidden="true" />
               </div>
               <div>
-                <p className="mb-2 text-sm font-medium text-foreground/70">After</p>
+                <p className="mb-2 text-sm font-medium text-foreground/70">{dict.portfolio.after}</p>
                 <div className="aspect-video rounded-[var(--radius-lg)] border border-border bg-surface-elevated" aria-hidden="true" />
               </div>
             </div>
@@ -236,7 +240,7 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
         {/* Results */}
         <section className="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-5xl">
-            <h2 className="font-sans text-xl font-semibold text-foreground">Results</h2>
+            <h2 className="font-sans text-xl font-semibold text-foreground">{dict.portfolio.results}</h2>
             <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
               {project.resultStats.map((stat) => (
                 <StatWidget key={stat.label} label={stat.label} value={stat.value} trend={stat.trend} />
@@ -248,7 +252,7 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
         {/* Technology */}
         <section className="bg-surface px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-5xl">
-            <h2 className="font-sans text-xl font-semibold text-foreground">Technology</h2>
+            <h2 className="font-sans text-xl font-semibold text-foreground">{dict.portfolio.technology}</h2>
             <div className="mt-6 flex flex-wrap gap-2">
               {project.tags.map((tag) => (
                 <MonoChip key={tag}>{tag}</MonoChip>
@@ -261,7 +265,7 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
         {project.pdfFiles && project.pdfFiles.length > 0 ? (
           <section className="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
             <div className="mx-auto max-w-5xl">
-              <h2 className="font-sans text-xl font-semibold text-foreground">Resources</h2>
+              <h2 className="font-sans text-xl font-semibold text-foreground">{dict.portfolio.resources}</h2>
               <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {project.pdfFiles.map((url, index) => (
                   <li key={url}>
@@ -287,7 +291,7 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
           <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-6 rounded-[var(--radius-lg)] border border-border p-8 sm:flex-row sm:items-center">
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-foreground/50">
-                Next project
+                {dict.portfolio.nextProject}
               </p>
               <p className="mt-1 font-sans text-lg font-semibold text-foreground">
                 {nextProject.title}
@@ -295,9 +299,9 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
             </div>
             <div className="flex gap-3">
               <Button href={`/portfolio/${nextProject.slug}`} variant="secondary">
-                Next project
+                {dict.portfolio.nextProject}
               </Button>
-              <Button href="/contact">Start a project</Button>
+              <Button href="/contact">{dict.portfolio.startAProject}</Button>
             </div>
           </div>
         </section>

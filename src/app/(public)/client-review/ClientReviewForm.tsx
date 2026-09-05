@@ -4,14 +4,7 @@ import { useState, type FormEvent } from "react";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
-
-const RATING_OPTIONS = [
-  { value: "5", label: "5 — Excellent" },
-  { value: "4", label: "4 — Good" },
-  { value: "3", label: "3 — Average" },
-  { value: "2", label: "2 — Below average" },
-  { value: "1", label: "1 — Poor" },
-];
+import { useTranslation } from "@/i18n/client";
 
 /**
  * Client Review feedback form — page-local client wrapper. The allowed
@@ -25,7 +18,16 @@ const RATING_OPTIONS = [
  * mechanism in a later phase).
  */
 export function ClientReviewForm() {
+  const { dict } = useTranslation();
   const [submitted, setSubmitted] = useState(false);
+
+  const ratingOptions = [
+    { value: "5", label: dict.clientReview.rating5 },
+    { value: "4", label: dict.clientReview.rating4 },
+    { value: "3", label: dict.clientReview.rating3 },
+    { value: "2", label: dict.clientReview.rating2 },
+    { value: "1", label: dict.clientReview.rating1 },
+  ];
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,9 +37,9 @@ export function ClientReviewForm() {
   if (submitted) {
     return (
       <div role="status" className="rounded-[var(--radius-lg)] border border-border bg-surface-elevated p-8 text-center">
-        <p className="font-sans text-lg font-semibold text-foreground">Feedback submitted</p>
+        <p className="font-sans text-lg font-semibold text-foreground">{dict.clientReview.feedbackSubmitted}</p>
         <p className="mt-2 text-sm text-foreground/70">
-          Thank you — your review has been sent to the studio for moderation.
+          {dict.clientReview.feedbackSubmittedDesc}
         </p>
       </div>
     );
@@ -48,20 +50,20 @@ export function ClientReviewForm() {
       <Select
         id="review-rating"
         name="rating"
-        label="Rating"
-        placeholder="Select a rating"
-        options={RATING_OPTIONS}
+        label={dict.clientReview.ratingLabel}
+        placeholder={dict.clientReview.selectRatingPlaceholder}
+        options={ratingOptions}
         required
       />
       <Textarea
         id="review-comment"
         name="comment"
-        label="Comment"
-        placeholder="Tell us how the project went"
+        label={dict.clientReview.commentLabel}
+        placeholder={dict.clientReview.commentPlaceholder}
         required
       />
       <Button type="submit" className="self-start">
-        Submit feedback
+        {dict.clientReview.submitFeedback}
       </Button>
     </form>
   );

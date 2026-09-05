@@ -3,6 +3,7 @@ import { SideNavBar } from "@/components/admin/SideNavBar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { StatWidget } from "@/components/data/StatWidget";
 import { PROJECTS, TESTIMONIALS, MESSAGES } from "@/lib/mock-data";
+import { getServerTranslation } from "@/i18n/server";
 import { RecentProjectsTable } from "./RecentProjectsTable";
 
 export const metadata: Metadata = {
@@ -17,55 +18,49 @@ const recentProjects = [...PROJECTS]
   .sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""))
   .slice(0, 5);
 
-const ACTIVITY = [
-  { id: "a1", label: "Published \u201cMeridian Bank Identity\u201d", time: "2 hours ago" },
-  { id: "a2", label: "Replied to a message from Marco Delgado", time: "Yesterday" },
-  { id: "a3", label: "Approved a testimonial from Marcus Iyer", time: "3 days ago" },
-  { id: "a4", label: "Saved changes to Website Development settings", time: "5 days ago" },
-];
+export default async function AdminDashboardPage() {
+  const { t } = await getServerTranslation();
 
-const SYSTEM_STATUS = [
-  { id: "server", label: "Server", state: "Operational" as const },
-  { id: "database", label: "Database", state: "Operational" as const },
-];
+  const activityItems = [
+    { id: "a1", label: t.admin.activityPublished.replace("{title}", "Meridian Bank Identity"), time: t.admin.time2HoursAgo },
+    { id: "a2", label: t.admin.activityReplied.replace("{name}", "Marco Delgado"), time: t.admin.timeYesterday },
+    { id: "a3", label: t.admin.activityApproved.replace("{name}", "Marcus Iyer"), time: t.admin.time3DaysAgo },
+    { id: "a4", label: t.admin.activitySavedSettings, time: t.admin.time5DaysAgo },
+  ];
 
-/**
- * Admin Dashboard (Page_Structure.md §12). Global Components: SideNavBar,
- * AdminHeader (self-composed here, matching this project's existing
- * public-page convention of pages rendering their own chrome directly).
- * All data is static mock data; the Recent Projects "View"/"Edit" actions
- * have no destination or handler wired (no CRUD/API per Foundation
- * restriction) beyond DataTable's own presentational confirm-step demo.
- */
-export default function AdminDashboardPage() {
+  const systemStatus = [
+    { id: "server", label: t.admin.serverLabel, state: t.admin.operationalStatus },
+    { id: "database", label: t.admin.databaseLabel, state: t.admin.operationalStatus },
+  ];
+
   return (
     <div className="flex min-h-dvh">
       <SideNavBar active="dashboard" />
       <div className="flex min-w-0 flex-1 flex-col">
-        <AdminHeader title="Dashboard" />
+        <AdminHeader title={t.admin.dashboard} />
         <main role="main" className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
-          <section aria-label="Studio metrics">
+          <section aria-label={t.admin.quickStats}>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              <StatWidget label="Projects" value={String(PROJECTS.length)} />
-              <StatWidget label="Published" value={String(publishedCount)} trend={{ direction: "up", text: "vs. last quarter" }} />
-              <StatWidget label="Messages" value={String(MESSAGES.length)} trend={{ direction: "up", text: `${newMessagesCount} new` }} />
-              <StatWidget label="Reviews" value={String(TESTIMONIALS.length)} />
-              <StatWidget label="Visitors" value="4,180" trend={{ direction: "up", text: "last 30 days" }} />
+              <StatWidget label={t.admin.projectsMetric} value={String(PROJECTS.length)} />
+              <StatWidget label={t.admin.publishedMetric} value={String(publishedCount)} trend={{ direction: "up", text: t.admin.vsLastQuarter }} />
+              <StatWidget label={t.admin.messagesMetric} value={String(MESSAGES.length)} trend={{ direction: "up", text: `${newMessagesCount} ${t.admin.newCount}` }} />
+              <StatWidget label={t.admin.reviewsMetric} value={String(TESTIMONIALS.length)} />
+              <StatWidget label={t.admin.visitorsMetric} value="4,180" trend={{ direction: "up", text: t.admin.last30Days }} />
             </div>
           </section>
 
-          <section aria-label="Recent projects" className="mt-10">
-            <h2 className="font-sans text-lg font-semibold text-foreground">Recent projects</h2>
+          <section aria-label={t.admin.recentProjects} className="mt-10">
+            <h2 className="font-sans text-lg font-semibold text-foreground">{t.admin.recentProjects}</h2>
             <div className="mt-4">
               <RecentProjectsTable projects={recentProjects} />
             </div>
           </section>
 
           <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
-            <section aria-label="Activity timeline">
-              <h2 className="font-sans text-lg font-semibold text-foreground">Activity</h2>
+            <section aria-label={t.admin.activityHeading}>
+              <h2 className="font-sans text-lg font-semibold text-foreground">{t.admin.activityHeading}</h2>
               <ol className="mt-4 flex flex-col gap-6 border-s border-border ps-5">
-                {ACTIVITY.map((item) => (
+                {activityItems.map((item) => (
                   <li key={item.id} className="relative">
                     <span
                       aria-hidden="true"
@@ -78,10 +73,10 @@ export default function AdminDashboardPage() {
               </ol>
             </section>
 
-            <section aria-label="System status">
-              <h2 className="font-sans text-lg font-semibold text-foreground">System status</h2>
+            <section aria-label={t.admin.systemStatusHeading}>
+              <h2 className="font-sans text-lg font-semibold text-foreground">{t.admin.systemStatusHeading}</h2>
               <ul className="mt-4 flex flex-col gap-3">
-                {SYSTEM_STATUS.map((item) => (
+                {systemStatus.map((item) => (
                   <li
                     key={item.id}
                     className="flex items-center justify-between rounded-[var(--radius-lg)] border border-border bg-surface-elevated p-4"

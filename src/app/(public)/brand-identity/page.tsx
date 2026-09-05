@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { TopNavBarWrapper } from "@/components/global/TopNavBarWrapper";
 import { Footer } from "@/components/global/Footer";
 import { MonoChip } from "@/components/content/MonoChip";
+import { getServerTranslation } from "@/i18n/server";
 
 const PAGE_TITLE = "Brand Identity — F Studio";
 const PAGE_DESCRIPTION =
@@ -24,13 +25,15 @@ export const metadata: Metadata = {
   },
 };
 
-const PALETTE = [
-  { name: "Paper", hex: "#FBF9F9" },
-  { name: "Ink", hex: "#1C1B1B" },
-  { name: "Teal", hex: "#008080" },
-];
+export default async function BrandIdentityPage() {
+  const { dict } = await getServerTranslation();
 
-export default function BrandIdentityPage() {
+  const palette = [
+    { name: dict.brandIdentity.colorPaper, hex: "#FBF9F9" },
+    { name: dict.brandIdentity.colorInk, hex: "#1C1B1B" },
+    { name: dict.brandIdentity.colorTeal, hex: "#008080" },
+  ];
+
   return (
     <div className="flex min-h-dvh flex-col">
       <TopNavBarWrapper />
@@ -39,10 +42,10 @@ export default function BrandIdentityPage() {
         <section className="border-b border-border px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-balance font-sans text-4xl font-semibold tracking-tight text-foreground">
-              The F Studio identity system
+              {dict.brandIdentity.heroTitle}
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-pretty leading-relaxed text-foreground/70">
-              A single, restrained system — neutrals carry the design, teal signals action.
+              {dict.brandIdentity.heroSubtitle}
             </p>
           </div>
         </section>
@@ -50,20 +53,21 @@ export default function BrandIdentityPage() {
         {/* Logo Usage */}
         <section className="bg-surface px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-5xl">
-            <h2 className="font-sans text-2xl font-semibold text-foreground">Logo usage</h2>
+            <h2 className="font-sans text-2xl font-semibold text-foreground">
+              {dict.brandIdentity.logoUsage}
+            </h2>
             <p className="mt-3 max-w-2xl text-foreground/70">
-              Wordmark and monogram, shown here on neutral 1:1 tiles per the logo showcase
-              standard (Component_List §13.3).
+              {dict.brandIdentity.logoUsageDesc}
             </p>
             <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div className="flex aspect-square flex-col items-center justify-center gap-3 rounded-[var(--radius-lg)] border border-border bg-surface-elevated">
                 <span className="font-sans text-2xl font-semibold text-foreground">F Studio</span>
-                <MonoChip>Wordmark — light</MonoChip>
+                <MonoChip>{dict.brandIdentity.wordmarkLight}</MonoChip>
               </div>
               <div className="flex aspect-square flex-col items-center justify-center gap-3 rounded-[var(--radius-lg)] bg-foreground">
                 <span className="font-sans text-2xl font-semibold text-background">F Studio</span>
                 <MonoChip className="border-background/20 bg-transparent text-background/80">
-                  Wordmark — dark
+                  {dict.brandIdentity.wordmarkDark}
                 </MonoChip>
               </div>
             </div>
@@ -73,10 +77,12 @@ export default function BrandIdentityPage() {
         {/* Color Palette */}
         <section className="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-5xl">
-            <h2 className="font-sans text-2xl font-semibold text-foreground">Color palette</h2>
+            <h2 className="font-sans text-2xl font-semibold text-foreground">
+              {dict.brandIdentity.colorPalette}
+            </h2>
             <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3">
-              {PALETTE.map((color) => (
-                <div key={color.name} className="overflow-hidden rounded-[var(--radius-lg)] border border-border">
+              {palette.map((color) => (
+                <div key={color.hex} className="overflow-hidden rounded-[var(--radius-lg)] border border-border">
                   <div className="h-24" style={{ backgroundColor: color.hex }} aria-hidden="true" />
                   <div className="p-4">
                     <p className="text-sm font-medium text-foreground">{color.name}</p>
@@ -91,20 +97,22 @@ export default function BrandIdentityPage() {
         {/* Typography */}
         <section className="bg-surface px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-5xl">
-            <h2 className="font-sans text-2xl font-semibold text-foreground">Typography</h2>
+            <h2 className="font-sans text-2xl font-semibold text-foreground">
+              {dict.brandIdentity.typography}
+            </h2>
             <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div className="rounded-[var(--radius-lg)] border border-border bg-surface-elevated p-8">
-                <MonoChip>Hanken Grotesk — Sans</MonoChip>
+                <MonoChip>{dict.brandIdentity.typographySansLabel}</MonoChip>
                 <p className="mt-4 font-sans text-3xl font-semibold text-foreground">Aa Bb Cc</p>
                 <p className="mt-2 font-sans text-sm text-foreground/70">
-                  Used for headings, body copy, and UI labels across every surface.
+                  {dict.brandIdentity.typographySansDesc}
                 </p>
               </div>
               <div className="rounded-[var(--radius-lg)] border border-border bg-surface-elevated p-8">
-                <MonoChip>Technical Mono</MonoChip>
+                <MonoChip>{dict.brandIdentity.typographyMonoLabel}</MonoChip>
                 <p className="mt-4 font-mono text-3xl font-semibold text-foreground">Aa Bb Cc</p>
                 <p className="mt-2 font-sans text-sm text-foreground/70">
-                  Reserved for mono-label accents: tags, metadata, and technical/data/AI moments.
+                  {dict.brandIdentity.typographyMonoDesc}
                 </p>
               </div>
             </div>
@@ -114,10 +122,11 @@ export default function BrandIdentityPage() {
         {/* Iconography */}
         <section className="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-5xl">
-            <h2 className="font-sans text-2xl font-semibold text-foreground">Iconography</h2>
+            <h2 className="font-sans text-2xl font-semibold text-foreground">
+              {dict.brandIdentity.iconography}
+            </h2>
             <p className="mt-3 max-w-2xl text-foreground/70">
-              A single 1.5px stroke line-icon system, used consistently across service and data
-              surfaces (UI_Guidelines §14.3).
+              {dict.brandIdentity.iconographyDesc}
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
               {[0, 1, 2, 3, 4].map((i) => (
@@ -138,10 +147,11 @@ export default function BrandIdentityPage() {
         {/* Application Gallery */}
         <section className="bg-surface px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-5xl">
-            <h2 className="font-sans text-2xl font-semibold text-foreground">Application gallery</h2>
+            <h2 className="font-sans text-2xl font-semibold text-foreground">
+              {dict.brandIdentity.applicationGallery}
+            </h2>
             <p className="mt-3 max-w-2xl text-foreground/70">
-              Realistic mockups in mixed ratios, one style per project for coherence (UI_Guidelines
-              §18.9).
+              {dict.brandIdentity.applicationGalleryDesc}
             </p>
             <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               <div className="aspect-video rounded-[var(--radius-lg)] border border-border bg-surface-elevated" aria-hidden="true" />

@@ -3,6 +3,7 @@ import { SideNavBar } from "@/components/admin/SideNavBar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { StatWidget } from "@/components/data/StatWidget";
 import { getProjects } from "@/lib/data/projects";
+import { getServerTranslation } from "@/i18n/server";
 import { ProjectsManagement } from "./ProjectsManagement";
 
 export const metadata: Metadata = {
@@ -14,14 +15,8 @@ export const metadata: Metadata = {
 // Integration) rather than the static PROJECTS mock array.
 export const dynamic = "force-dynamic";
 
-/**
- * Projects Management (Page_Structure.md §13). Global Components:
- * SideNavBar, AdminHeader. Module Metrics render here; the interactive
- * Management Table + Project Editor drawer live in ProjectsManagement
- * (colocated client component, matching this project's existing
- * PortfolioBrowser/ContactForm pattern).
- */
 export default async function AdminProjectsPage() {
+  const { t } = await getServerTranslation();
   const projects = await getProjects();
   const publishedCount = projects.filter((p) => p.status === "Published").length;
   const draftCount = projects.filter((p) => p.status === "Draft").length;
@@ -30,17 +25,20 @@ export default async function AdminProjectsPage() {
     <div className="flex min-h-dvh">
       <SideNavBar active="projects" />
       <div className="flex min-w-0 flex-1 flex-col">
-        <AdminHeader title="Projects" breadcrumbs={[{ label: "Admin" }, { label: "Projects" }]} />
+        <AdminHeader
+          title={t.admin.projects}
+          breadcrumbs={[{ label: t.admin.adminBadge }, { label: t.admin.projects }]}
+        />
         <main role="main" className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
-          <section aria-label="Project metrics">
+          <section aria-label={t.projectsCMS.projectMetrics}>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <StatWidget label="Total projects" value={String(projects.length)} />
-              <StatWidget label="Published" value={String(publishedCount)} />
-              <StatWidget label="Draft" value={String(draftCount)} />
+              <StatWidget label={t.projectsCMS.totalProjects} value={String(projects.length)} />
+              <StatWidget label={t.projectsCMS.published} value={String(publishedCount)} />
+              <StatWidget label={t.projectsCMS.draft} value={String(draftCount)} />
             </div>
           </section>
 
-          <section aria-label="All projects" className="mt-8">
+          <section aria-label={t.projectsCMS.allProjects} className="mt-8">
             <ProjectsManagement projects={projects} />
           </section>
         </main>

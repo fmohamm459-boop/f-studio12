@@ -1,0 +1,6 @@
+{
+  "name": "F Studio",
+  "description": "Digital Design & Technology Solutions — studio portfolio, client review, and administration system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

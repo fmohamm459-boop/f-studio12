@@ -2,41 +2,16 @@
 
 import { useId, useRef, useState } from "react";
 import { getUploadSignature } from "@/lib/actions/media";
-
-// Upload Zone (Phase 9.3.12 Stage 1: PDF-only; generalized in Stage 2 to
-// also back Hero Image and Gallery Images). This remains the single
-// upload component in the project — Stage 2's brief was explicit about
-// reusing it rather than adding a second one, so every upload surface in
-// the Project Editor (PDFs, hero image, gallery) renders through this
-// same file. File kept at its Stage 1 path/name; only the exported
-// component was generalized (from `PdfUploadZone` to `UploadZone`) and
-// its behavior parameterized via props — the upload mechanics
-// (getUploadSignature → signed direct-to-Cloudinary XHR upload) are
-// unchanged from Stage 1.
+import { useTranslation } from "@/i18n/client";
 
 type UploadZoneProps = {
-  /** Field label shown above the drop zone. */
   label: string;
-  /** One line of help text under the label. */
   helpText: string;
-  /** Native <input accept>. Use a MIME wildcard like "image/*" for images. */
   accept: string;
-  /** Noun used in validation messages, e.g. "PDF" or "image". */
   acceptLabel: string;
-  /** Whether the native file picker allows selecting more than one file at once. */
   multiple: boolean;
-  /**
-   * 1 = single-file "replace" mode (Hero Image): uploading a new file
-   * replaces whatever is already there. Omitted/undefined = unlimited
-   * (PDFs, Gallery Images): uploads append, preserving order.
-   */
   maxFiles?: number;
-  /** Cloudinary folder passed through to getUploadSignature — unchanged
-   * signing mechanism from Stage 1, just a different destination folder
-   * per field. */
   folder: string;
-  /** How already-uploaded files render: a document-icon list row (PDFs)
-   * or an image thumbnail tile (Hero/Gallery). */
   previewKind: "icon" | "thumbnail";
   value: string[];
   onChange: (files: string[]) => void;
@@ -92,7 +67,7 @@ function TrashIcon({ className }: { className?: string }) {
   );
 }
 
-function fileLabel(url: string, acceptLabel: string): string {
+function fileLabel(url: string, acceptLabel: string, fallbackSuffix: string): string {
   try {
     const { pathname } = new URL(url);
     const last = pathname.split("/").filter(Boolean).pop();
@@ -100,7 +75,7 @@ function fileLabel(url: string, acceptLabel: string): string {
   } catch {
     // Not a parseable absolute URL — fall through.
   }
-  return `${acceptLabel} file`;
+  return `${acceptLabel} ${fallbackSuffix}`;
 }
 
 /** True if `file`'s MIME type satisfies an <input accept> string ("application/pdf" or a wildcard like "image/*"). */
@@ -111,7 +86,7 @@ function matchesAccept(file: File, accept: string): boolean {
   return file.type === accept;
 }
 
-/** Uploads one file directly to Cloudinary using a server-issued signature. Unchanged from Stage 1. */
+/** Uploads one file directly to Cloudinary using a server-issued signature. */
 function uploadToCloudinary(
   file: File,
   signature: Awaited<ReturnType<typeof getUploadSignature>>,
@@ -156,18 +131,6 @@ function uploadToCloudinary(
   });
 }
 
-/**
- * Generic upload zone for the Project Editor. Uploads directly to
- * Cloudinary via a signed request (src/lib/actions/media.ts) and reports
- * resulting `secure_url`s back to the parent form via `onChange` —
- * persistence to the database happens when the Project Editor's own
- * "Save changes" is submitted, the same as every other field in that
- * form (an upload only ever updates local draft state on its own).
- *
- * "Remove" only drops a URL from this list (and, once saved, from the
- * corresponding database field) — it does not delete the underlying
- * Cloudinary asset. See the phase report's "Remaining limitations".
- */
 export function UploadZone({
   label,
   helpText,
@@ -180,6 +143,7 @@ export function UploadZone({
   value,
   onChange,
 }: UploadZoneProps) {
+  const { t } = useTranslation();
   const [state, setState] = useState<UploadState>({ status: "idle" });
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
@@ -190,11 +154,19 @@ export function UploadZone({
 
     for (const file of files) {
       if (!matchesAccept(file, accept)) {
-        setState({ status: "error", message: `"${file.name}" isn't a valid ${acceptLabel.toLowerCase()}.` });
+        setState({
+          status: "error",
+          message: t.uploadZone.invalidFileType
+            .replace("{fileName}", file.name)
+            .replace("{acceptLabel}", acceptLabel.toLowerCase()),
+        });
         continue;
       }
       if (file.size > MAX_FILE_BYTES) {
-        setState({ status: "error", message: `"${file.name}" is over the 10MB limit.` });
+        setState({
+          status: "error",
+          message: t.uploadZone.fileOverLimit.replace("{fileName}", file.name),
+        });
         continue;
       }
 
@@ -204,13 +176,13 @@ export function UploadZone({
         const url = await uploadToCloudinary(file, signature, (progress) =>
           setState({ status: "uploading", fileName: file.name, progress }),
         );
-        // maxFiles === 1 is "replace" mode (Hero Image): the new upload
-        // takes the single slot rather than appending. Otherwise, append
-        // and preserve the existing order (PDFs, Gallery Images).
         onChange(maxFiles === 1 ? [url] : [...value, url]);
         setState({ status: "success" });
       } catch {
-        setState({ status: "error", message: `Couldn't upload "${file.name}". Please try again.` });
+        setState({
+          status: "error",
+          message: t.uploadZone.uploadFailed.replace("{fileName}", file.name),
+        });
       }
     }
 
@@ -224,10 +196,12 @@ export function UploadZone({
   const isUploading = state.status === "uploading";
   const atCapacity = maxFiles !== undefined && value.length >= maxFiles;
   const promptText = isUploading
-    ? `Uploading ${state.fileName}… ${state.progress}%`
+    ? t.uploadZone.uploadingFile
+        .replace("{fileName}", state.fileName)
+        .replace("{progress}", String(state.progress))
     : atCapacity
-      ? `Click to replace, or drag and drop a new ${acceptLabel.toLowerCase()}`
-      : `Click to upload, or drag and drop`;
+      ? t.uploadZone.replacePrompt.replace("{acceptLabel}", acceptLabel.toLowerCase())
+      : t.uploadZone.uploadPrompt;
 
   return (
     <div>
@@ -257,7 +231,7 @@ export function UploadZone({
       </div>
 
       <p role="status" className="mt-2 min-h-[1.25rem] text-xs text-primary">
-        {state.status === "success" ? "Upload complete." : ""}
+        {state.status === "success" ? t.uploadZone.uploadComplete : ""}
       </p>
       <p role="alert" className="mt-1 min-h-[1.25rem] text-xs text-foreground">
         {state.status === "error" ? state.message : ""}
@@ -265,23 +239,26 @@ export function UploadZone({
 
       {value.length > 0 && previewKind === "icon" ? (
         <ul className="mt-3 flex flex-col gap-2">
-          {value.map((url) => (
-            <li
-              key={url}
-              className="flex min-h-[44px] items-center gap-3 rounded-[var(--radius-lg)] border border-border bg-surface px-4 py-2"
-            >
-              <DocumentIcon className="shrink-0 text-primary" />
-              <span className="min-w-0 flex-1 truncate text-sm text-foreground">{fileLabel(url, acceptLabel)}</span>
-              <button
-                type="button"
-                onClick={() => handleRemove(url)}
-                aria-label={`Remove ${fileLabel(url, acceptLabel)}`}
-                className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-[var(--radius-lg)] text-foreground/60 hover:bg-background hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          {value.map((url) => {
+            const name = fileLabel(url, acceptLabel, t.uploadZone.fileFallback);
+            return (
+              <li
+                key={url}
+                className="flex min-h-[44px] items-center gap-3 rounded-[var(--radius-lg)] border border-border bg-surface px-4 py-2"
               >
-                <TrashIcon />
-              </button>
-            </li>
-          ))}
+                <DocumentIcon className="shrink-0 text-primary" />
+                <span className="min-w-0 flex-1 truncate text-sm text-foreground">{name}</span>
+                <button
+                  type="button"
+                  onClick={() => handleRemove(url)}
+                  aria-label={t.uploadZone.removeFileAria.replace("{label}", name)}
+                  className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-[var(--radius-lg)] text-foreground/60 hover:bg-background hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                >
+                  <TrashIcon />
+                </button>
+              </li>
+            );
+          })}
         </ul>
       ) : null}
 
@@ -292,14 +269,12 @@ export function UploadZone({
               key={url}
               className="group relative aspect-video overflow-hidden rounded-[var(--radius-lg)] border border-border bg-surface"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element -- next/image requires
-                  a remotePatterns entry for res.cloudinary.com in next.config.ts, which is
-                  out of scope for this phase (see the phase report). */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={url} alt="" className="h-full w-full object-cover" />
               <button
                 type="button"
                 onClick={() => handleRemove(url)}
-                aria-label="Remove image"
+                aria-label={t.uploadZone.removeImageAria}
                 className="absolute end-1.5 top-1.5 flex min-h-[32px] min-w-[32px] items-center justify-center rounded-[var(--radius-lg)] bg-ink/60 text-paper opacity-0 transition-opacity duration-150 hover:bg-ink/80 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary group-hover:opacity-100"
               >
                 <TrashIcon />

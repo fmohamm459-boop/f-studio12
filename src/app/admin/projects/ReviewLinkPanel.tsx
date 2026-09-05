@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
 import { generateReviewLink, getReviewLink } from "@/lib/actions/review";
+import { useTranslation } from "@/i18n/client";
 
 type ReviewLinkPanelProps = {
   slug: string;
@@ -16,8 +17,11 @@ type LinkState =
   | { status: "ready"; reviewToken: string; tokenExpiresAt: Date }
   | { status: "error"; message: string };
 
-function formatExpiry(date: Date): string {
-  return new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(date);
+function formatExpiry(date: Date, locale: string): string {
+  return new Intl.DateTimeFormat(locale === "ar" ? "ar-SA" : "en", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
 }
 
 function CopyIcon({ className }: { className?: string }) {
@@ -43,18 +47,8 @@ function LinkIcon({ className }: { className?: string }) {
   );
 }
 
-/**
- * Review Link panel (Phase 9.3.11 Stage 3, Projects Management row action
- * "Review link"). Centered modal — deliberately lighter-weight than the
- * Project Editor's side drawer (§15.5), since this is a single self-
- * contained utility action rather than a form.
- *
- * On open, reads any existing active token via `getReviewLink` so a
- * previously generated link can be viewed/copied without minting a new
- * one; "Generate"/"Regenerate" call `generateReviewLink`, whose silent-
- * overwrite behavior is unchanged from Stage 1 (confirmed intentional).
- */
 export function ReviewLinkPanel({ slug, title, onClose }: ReviewLinkPanelProps) {
+  const { t, locale } = useTranslation();
   const [state, setState] = useState<LinkState>({ status: "loading" });
   const [copied, setCopied] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -67,12 +61,12 @@ export function ReviewLinkPanel({ slug, title, onClose }: ReviewLinkPanelProps) 
         setState(result ? { status: "ready", ...result } : { status: "none" });
       })
       .catch(() => {
-        if (!cancelled) setState({ status: "error", message: "Couldn't check for an existing link." });
+        if (!cancelled) setState({ status: "error", message: t.projectsCMS.errorCheckingLink });
       });
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [slug, t]);
 
   function handleGenerate() {
     setCopied(false);
@@ -81,7 +75,7 @@ export function ReviewLinkPanel({ slug, title, onClose }: ReviewLinkPanelProps) 
         const result = await generateReviewLink(slug);
         setState({ status: "ready", ...result });
       } catch {
-        setState({ status: "error", message: "Couldn't generate a review link. Please try again." });
+        setState({ status: "error", message: t.projectsCMS.errorGeneratingLink });
       }
     });
   }
@@ -93,7 +87,7 @@ export function ReviewLinkPanel({ slug, title, onClose }: ReviewLinkPanelProps) 
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      setState({ status: "error", message: "Couldn't copy the link — you can select and copy it manually." });
+      setState({ status: "error", message: t.projectsCMS.errorCopyingLink });
     }
   }
 
@@ -101,25 +95,25 @@ export function ReviewLinkPanel({ slug, title, onClose }: ReviewLinkPanelProps) 
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button
         type="button"
-        aria-label="Close review link panel"
+        aria-label={t.projectsCMS.closeReviewLinkModal}
         onClick={onClose}
         className="absolute inset-0 bg-ink/40"
       />
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={`Review link for ${title}`}
+        aria-label={`${t.projectsCMS.reviewLinkModalTitle} - ${title}`}
         className="relative flex w-full max-w-md flex-col rounded-[var(--radius-lg)] border border-border bg-surface-elevated p-6 shadow-[var(--shadow-md)] sm:p-8"
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-2.5">
             <LinkIcon className="shrink-0 text-primary" />
-            <h2 className="font-sans text-lg font-semibold text-foreground">Review link</h2>
+            <h2 className="font-sans text-lg font-semibold text-foreground">{t.projectsCMS.reviewLinkModalTitle}</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close review link panel"
+            aria-label={t.projectsCMS.closeReviewLinkModal}
             className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--radius-lg)] text-foreground/70 hover:bg-surface hover:text-foreground"
           >
             <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -132,7 +126,7 @@ export function ReviewLinkPanel({ slug, title, onClose }: ReviewLinkPanelProps) 
 
         <div className="mt-6">
           {state.status === "loading" ? (
-            <p className="text-sm text-foreground/60">Checking for an existing link…</p>
+            <p className="text-sm text-foreground/60">{t.projectsCMS.checkingExistingLink}</p>
           ) : null}
 
           {state.status === "error" ? (
@@ -144,10 +138,10 @@ export function ReviewLinkPanel({ slug, title, onClose }: ReviewLinkPanelProps) 
           {state.status === "none" ? (
             <div>
               <p className="text-sm text-foreground/70">
-                No active review link for this project yet.
+                {t.projectsCMS.noActiveLink}
               </p>
               <Button type="button" onClick={handleGenerate} className="mt-4" aria-busy={isPending}>
-                {isPending ? "Generating…" : "Generate review link"}
+                {isPending ? t.projectsCMS.generatingReviewLink : t.projectsCMS.generateReviewLink}
               </Button>
             </div>
           ) : null}
@@ -155,7 +149,7 @@ export function ReviewLinkPanel({ slug, title, onClose }: ReviewLinkPanelProps) 
           {state.status === "ready" ? (
             <div>
               <label htmlFor="review-link-url" className="text-xs font-medium uppercase tracking-wide text-foreground/50">
-                Private link
+                {t.projectsCMS.privateLink}
               </label>
               <div className="mt-2 flex items-stretch gap-2">
                 <input
@@ -172,15 +166,15 @@ export function ReviewLinkPanel({ slug, title, onClose }: ReviewLinkPanelProps) 
                   className="flex min-h-[44px] shrink-0 items-center gap-2 rounded-[var(--radius-lg)] border border-border px-4 text-sm font-medium text-foreground transition-colors duration-150 hover:bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 >
                   <CopyIcon />
-                  Copy
+                  {t.projectsCMS.copy}
                 </button>
               </div>
               <p role="status" className="mt-2 min-h-[1.25rem] text-xs text-primary">
-                {copied ? "Copied to clipboard." : ""}
+                {copied ? t.projectsCMS.copiedToClipboard : ""}
               </p>
 
               <p className="mt-3 text-xs text-foreground/50">
-                Expires {formatExpiry(state.tokenExpiresAt)}
+                {t.projectsCMS.expiresOn.replace("{date}", formatExpiry(state.tokenExpiresAt, locale))}
               </p>
 
               <Button
@@ -190,10 +184,10 @@ export function ReviewLinkPanel({ slug, title, onClose }: ReviewLinkPanelProps) 
                 className="mt-5"
                 aria-busy={isPending}
               >
-                {isPending ? "Regenerating…" : "Regenerate link"}
+                {isPending ? t.projectsCMS.regeneratingLink : t.projectsCMS.regenerateLink}
               </Button>
               <p className="mt-2 text-xs text-foreground/50">
-                Regenerating replaces this link — the previous one stops working immediately.
+                {t.projectsCMS.regenerateWarning}
               </p>
             </div>
           ) : null}
