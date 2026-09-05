@@ -3,6 +3,7 @@ import { SideNavBar } from "@/components/admin/SideNavBar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { SettingsManagement } from "./SettingsManagement";
 import { getSiteSettings } from "@/lib/actions/settings";
+import { getServerTranslation } from "@/i18n/server";
 
 export const metadata: Metadata = {
   title: "Settings — F Studio Admin",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminSettingsPage() {
+  const { t } = await getServerTranslation();
   const settings = await getSiteSettings();
 
   return (
@@ -18,8 +20,8 @@ export default async function AdminSettingsPage() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <AdminHeader
-          title="Settings"
-          breadcrumbs={[{ label: "Admin" }, { label: "Settings" }]}
+          title={t.admin.settings}
+          breadcrumbs={[{ label: t.admin.dashboard, href: "/admin/dashboard" }, { label: t.admin.settings }]}
         />
 
         <main role="main" className="flex-1 px-4 py-8 sm:px-6 lg:px-8">

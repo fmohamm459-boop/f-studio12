@@ -16,6 +16,29 @@ const DICTIONARIES: Record<Locale, TranslationDictionary> = {
   ar,
 };
 
+export type ServerTranslationFunction = TranslationDictionary & {
+  (path: string, fallback?: string): string;
+};
+
+function createTranslationFunction(dict: TranslationDictionary): ServerTranslationFunction {
+  const fn = function (path: string, fallback?: string): string {
+    const segments = path.split(".");
+    let current: unknown = dict;
+
+    for (const segment of segments) {
+      if (current && typeof current === "object" && segment in current) {
+        current = (current as Record<string, unknown>)[segment];
+      } else {
+        return fallback ?? path;
+      }
+    }
+
+    return typeof current === "string" ? current : (fallback ?? path);
+  };
+
+  return Object.assign(fn, dict);
+}
+
 export function getDictionary(locale: Locale): TranslationDictionary {
   return DICTIONARIES[locale] ?? DICTIONARIES.en;
 }
@@ -51,29 +74,14 @@ export async function getServerLocale(): Promise<Locale> {
 export async function getServerTranslation() {
   const locale = await getServerLocale();
   const direction: Direction = getDirectionForLocale(locale);
+  const isRtl = direction === "rtl";
   const dict = getDictionary(locale);
-
-  /**
-   * Helper to retrieve string by nested key, e.g. "common.save" or "nav.home"
-   */
-  function t(path: string, fallback?: string): string {
-    const segments = path.split(".");
-    let current: unknown = dict;
-
-    for (const segment of segments) {
-      if (current && typeof current === "object" && segment in current) {
-        current = (current as Record<string, unknown>)[segment];
-      } else {
-        return fallback ?? path;
-      }
-    }
-
-    return typeof current === "string" ? current : (fallback ?? path);
-  }
+  const t = createTranslationFunction(dict);
 
   return {
     locale,
     direction,
+    isRtl,
     dict,
     t,
   };

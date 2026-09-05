@@ -74,14 +74,14 @@ export function ProjectsManagement({ projects }: ProjectsManagementProps) {
         sortable: true,
         sortValue: (p) => p.category,
         render: (p) => {
-          let label = p.category;
-          if (p.category === "Branding" || p.category === "Branding & Visual Identity") {
+          let label: string = p.category;
+          if (p.category === "Branding") {
             label = t.projectsCMS.categoryBranding;
-          } else if (p.category === "Web Development" || p.category === "Website Development") {
+          } else if (p.category === "Web Development") {
             label = t.projectsCMS.categoryWebDev;
-          } else if (p.category === "Data Analysis" || p.category === "Data Architecture") {
+          } else if (p.category === "Data Analysis") {
             label = t.projectsCMS.categoryData;
-          } else if (p.category === "AI" || p.category === "AI Integration") {
+          } else if (p.category === "AI") {
             label = t.projectsCMS.categoryAI;
           }
           return <MonoChip>{label}</MonoChip>;

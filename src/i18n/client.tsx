@@ -7,6 +7,7 @@ import React, {
   useTransition,
   useCallback,
   useEffect,
+  useMemo,
 } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -24,11 +25,35 @@ const DICTIONARIES: Record<Locale, TranslationDictionary> = {
   ar,
 };
 
+export type TranslationFunction = TranslationDictionary & {
+  (path: string, fallback?: string): string;
+};
+
+function createTranslationFunction(dict: TranslationDictionary): TranslationFunction {
+  const fn = function (path: string, fallback?: string): string {
+    const segments = path.split(".");
+    let current: unknown = dict;
+
+    for (const segment of segments) {
+      if (current && typeof current === "object" && segment in current) {
+        current = (current as Record<string, unknown>)[segment];
+      } else {
+        return fallback ?? path;
+      }
+    }
+
+    return typeof current === "string" ? current : (fallback ?? path);
+  };
+
+  return Object.assign(fn, dict);
+}
+
 interface LanguageContextValue {
   locale: Locale;
   direction: Direction;
+  isRtl: boolean;
   dict: TranslationDictionary;
-  t: (path: string, fallback?: string) => string;
+  t: TranslationFunction;
   setLocale: (newLocale: Locale) => Promise<void>;
   isPending: boolean;
 }
@@ -51,7 +76,7 @@ export function LanguageProvider({
   }, [initialLocale]);
 
   const direction = getDirectionForLocale(locale);
-
+  const isRtl = direction === "rtl";
   const dict = DICTIONARIES[locale] ?? DICTIONARIES.en;
 
   // Sync document element lang and dir on locale change
@@ -62,23 +87,7 @@ export function LanguageProvider({
     }
   }, [locale, direction]);
 
-  const t = useCallback(
-    (path: string, fallback?: string): string => {
-      const segments = path.split(".");
-      let current: unknown = dict;
-
-      for (const segment of segments) {
-        if (current && typeof current === "object" && segment in current) {
-          current = (current as Record<string, unknown>)[segment];
-        } else {
-          return fallback ?? path;
-        }
-      }
-
-      return typeof current === "string" ? current : (fallback ?? path);
-    },
-    [dict]
-  );
+  const t = useMemo(() => createTranslationFunction(dict), [dict]);
 
   const handleSetLocale = useCallback(
     async (newLocale: Locale) => {
@@ -97,6 +106,7 @@ export function LanguageProvider({
       value={{
         locale,
         direction,
+        isRtl,
         dict,
         t,
         setLocale: handleSetLocale,
@@ -114,22 +124,13 @@ export function useTranslation(): LanguageContextValue {
     const fallbackLocale = DEFAULT_LOCALE;
     const fallbackDirection = getDirectionForLocale(fallbackLocale);
     const fallbackDict = DICTIONARIES.en;
+    const fallbackT = createTranslationFunction(fallbackDict);
     return {
       locale: fallbackLocale,
       direction: fallbackDirection,
+      isRtl: fallbackDirection === "rtl",
       dict: fallbackDict,
-      t: (path: string, fallback?: string) => {
-        const segments = path.split(".");
-        let current: unknown = fallbackDict;
-        for (const segment of segments) {
-          if (current && typeof current === "object" && segment in current) {
-            current = (current as Record<string, unknown>)[segment];
-          } else {
-            return fallback ?? path;
-          }
-        }
-        return typeof current === "string" ? current : (fallback ?? path);
-      },
+      t: fallbackT,
       setLocale: async () => {},
       isPending: false,
     };
