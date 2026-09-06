@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: "Configure general, brand, contact, security, and system settings.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminSettingsPage() {
   const { t } = await getServerTranslation();
   const settings = await getSiteSettings();

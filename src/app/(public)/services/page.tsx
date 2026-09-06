@@ -35,6 +35,8 @@ const STACK = {
   Data: ["PostgreSQL", "Prisma"],
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ServicesPage() {
   const { dict, locale } = await getServerTranslation();
   const services = getLocalizedServices(locale);

@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   description: "Create the first owner account for the F Studio admin dashboard.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminSetupPage({
   searchParams,
 }: {

@@ -32,7 +32,7 @@ export const dynamic = "force-dynamic";
 
 export default async function TestimonialsPage() {
   const { dict } = await getServerTranslation();
-  const TESTIMONIALS = await getTestimonials();
+  const TESTIMONIALS = await getTestimonials({ status: "APPROVED" });
   const [featured, ...rest] = TESTIMONIALS;
 
   if (!featured) {

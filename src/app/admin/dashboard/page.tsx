@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { SideNavBar } from "@/components/admin/SideNavBar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { StatWidget } from "@/components/data/StatWidget";
-import { PROJECTS, TESTIMONIALS, MESSAGES } from "@/lib/mock-data";
+import { getProjects } from "@/lib/data/projects";
+import { getTestimonials } from "@/lib/data/testimonials";
+import { getMessages } from "@/lib/data/messages";
 import { getServerTranslation } from "@/i18n/server";
 import { RecentProjectsTable } from "./RecentProjectsTable";
 
@@ -11,15 +13,23 @@ export const metadata: Metadata = {
   description: "Studio-wide overview of projects, messages, reviews, and system status.",
 };
 
-const publishedCount = PROJECTS.filter((p) => p.status === "Published").length;
-const newMessagesCount = MESSAGES.filter((m) => m.status === "New").length;
-
-const recentProjects = [...PROJECTS]
-  .sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""))
-  .slice(0, 5);
+export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   const { t } = await getServerTranslation();
+
+  const [projects, testimonials, messages] = await Promise.all([
+    getProjects(),
+    getTestimonials(),
+    getMessages(),
+  ]);
+
+  const publishedCount = projects.filter((p) => p.status === "Published").length;
+  const newMessagesCount = messages.filter((m) => m.status === "New").length;
+
+  const recentProjects = [...projects]
+    .sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""))
+    .slice(0, 5);
 
   const activityItems = [
     { id: "a1", label: t.admin.activityPublished.replace("{title}", "Meridian Bank Identity"), time: t.admin.time2HoursAgo },
@@ -41,10 +51,10 @@ export default async function AdminDashboardPage() {
         <main role="main" className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
           <section aria-label={t.admin.quickStats}>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              <StatWidget label={t.admin.projectsMetric} value={String(PROJECTS.length)} />
+              <StatWidget label={t.admin.projectsMetric} value={String(projects.length)} />
               <StatWidget label={t.admin.publishedMetric} value={String(publishedCount)} trend={{ direction: "up", text: t.admin.vsLastQuarter }} />
-              <StatWidget label={t.admin.messagesMetric} value={String(MESSAGES.length)} trend={{ direction: "up", text: `${newMessagesCount} ${t.admin.newCount}` }} />
-              <StatWidget label={t.admin.reviewsMetric} value={String(TESTIMONIALS.length)} />
+              <StatWidget label={t.admin.messagesMetric} value={String(messages.length)} trend={{ direction: "up", text: `${newMessagesCount} ${t.admin.newCount}` }} />
+              <StatWidget label={t.admin.reviewsMetric} value={String(testimonials.length)} />
               <StatWidget label={t.admin.visitorsMetric} value="4,180" trend={{ direction: "up", text: t.admin.last30Days }} />
             </div>
           </section>

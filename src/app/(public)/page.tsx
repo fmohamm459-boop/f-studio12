@@ -43,7 +43,7 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const { dict, locale } = await getServerTranslation();
   const projects = await getProjects();
-  const testimonials = await getTestimonials();
+  const testimonials = await getTestimonials({ status: "APPROVED" });
   const featuredProjects = projects.slice(0, 3);
   const featuredTestimonial = testimonials[0];
   const services = getLocalizedServices(locale);

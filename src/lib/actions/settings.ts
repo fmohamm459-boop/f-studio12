@@ -2,6 +2,14 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/auth";
+
+async function requireAdmin() {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+}
 
 export async function getSiteSettings() {
   let settings = await prisma.siteSettings.findFirst();
@@ -37,6 +45,7 @@ export async function updateSiteSettings(data: {
   language?: string;
   direction?: string;
 }){
+  await requireAdmin();
   const existing = await prisma.siteSettings.findFirst();
 
   if (!existing) {

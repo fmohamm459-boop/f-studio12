@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { TopNavBarWrapper } from "@/components/global/TopNavBarWrapper";
+import { TopNavBar } from "@/components/global/TopNavBar";
 import { Footer } from "@/components/global/Footer";
 import { Button } from "@/components/ui/Button";
 
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <div className="flex min-h-dvh flex-col">
-      <TopNavBarWrapper />
+      <TopNavBar siteName="F Studio" />
 
       <main role="main" className="flex-1">
         <section className="px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
