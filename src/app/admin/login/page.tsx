@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: "Sign in to the F Studio admin dashboard.",
 };
 
-export const dynamic = "force-dynamic";
+
 
 export default async function AdminLoginPage({
   searchParams,

@@ -6,7 +6,7 @@ import { getDirectionForLocale } from "@/i18n/config";
 import { LanguageProvider } from "@/i18n/client";
 import "./globals.css";
 
-export const dynamic = "force-dynamic";
+
 
 async function getSiteSettings() {
   return await prisma.siteSettings.findFirst();

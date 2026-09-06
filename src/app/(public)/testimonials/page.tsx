@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 
 // Reads live Testimonial rows on every request (Phase 9.3.9, Database
 // Integration) rather than the static TESTIMONIALS mock array.
-export const dynamic = "force-dynamic";
+
 
 export default async function TestimonialsPage() {
   const { dict } = await getServerTranslation();

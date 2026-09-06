@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: "Review and respond to inbound studio inquiries.",
 };
 
-export const dynamic = "force-dynamic";
+
 
 export default async function AdminMessagesPage() {
   const { t } = await getServerTranslation();

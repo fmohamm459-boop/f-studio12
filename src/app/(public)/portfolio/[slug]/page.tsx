@@ -46,7 +46,7 @@ type ProjectDetailsPageProps = {
 // Reads live Project rows (Phase 9.3.9, Database Integration) rather than
 // the static PROJECTS mock array. Slugs not returned here still render
 // on-demand — Next's dynamicParams default (true) is unchanged.
-export const dynamic = "force-dynamic";
+
 
 export async function generateStaticParams() {
   const slugs = await getProjectSlugs();

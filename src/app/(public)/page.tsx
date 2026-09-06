@@ -38,7 +38,7 @@ const SERVICE_ICONS = [LogoDesignIcon, BrandIdentityIcon, WebDevelopmentIcon, Da
 // Database Integration — same pattern already used by
 // (public)/portfolio/page.tsx and (public)/testimonials/page.tsx) rather
 // than the static PROJECTS/TESTIMONIALS mock arrays (Phase 9.3.14-A Fix 1).
-export const dynamic = "force-dynamic";
+
 
 export default async function HomePage() {
   const { dict, locale } = await getServerTranslation();

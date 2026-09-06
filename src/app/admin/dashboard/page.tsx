@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: "Studio-wide overview of projects, messages, reviews, and system status.",
 };
 
-export const dynamic = "force-dynamic";
+
 
 export default async function AdminDashboardPage() {
   const { t } = await getServerTranslation();

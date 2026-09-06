@@ -12,7 +12,7 @@ type ReviewPageProps = {
 
 // Token-gated content is per-request and must never be statically cached
 // or served stale — every visit re-validates against the database.
-export const dynamic = "force-dynamic";
+
 
 // Private links are not for search engines, regardless of whether the
 // token turns out to be valid.

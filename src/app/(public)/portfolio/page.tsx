@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 
 // Reads live Project rows on every request (Phase 9.3.9, Database
 // Integration) rather than the static PROJECTS mock array.
-export const dynamic = "force-dynamic";
+
 
 export default async function PortfolioPage() {
   const { dict } = await getServerTranslation();

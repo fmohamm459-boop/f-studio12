@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: "Moderate client testimonials before they appear publicly.",
 };
 
-export const dynamic = "force-dynamic";
+
 
 export default async function AdminTestimonialsPage() {
   const { t } = await getServerTranslation();
